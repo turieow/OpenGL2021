@@ -18,10 +18,10 @@
 const Position positions[] =
 {
 	// 地面
-	{-20.0f, 0.0f, 20.0f},
-	{ 20.0f, 0.0f, 20.0f},
-	{ 20.0f, 0.0f,-20.0f},
-	{-20.0f, 0.0f,-20.0f},
+	{-2.0f, 0.0f, 2.0f},
+	{ 2.0f, 0.0f, 2.0f},
+	{ 2.0f, 0.0f,-2.0f},
+	{-2.0f, 0.0f,-2.0f},
 
 	{-0.2f, -0.5f, 0.1f},
 	{ 0.3f, -0.5f, 0.1f},
@@ -54,6 +54,15 @@ const Color colors[]
 	{ 1.0f, 0.0f, 0.0f, 1.0f }, // 赤
 };
 
+/// テクスチャ座標データ.
+const glm::vec2 texcoords[] = {
+	// 地面
+	{-4.0f,-4.0f },
+	{ 4.0f,-4.0f },
+	{ 4.0f, 4.0f },
+	{-4.0f, 4.0f },
+};
+
 // インデックスデータ.
 	const GLushort indices[] = {
 	0, 1, 2, 2, 3, 0,
@@ -64,31 +73,70 @@ const Color colors[]
 // 描画データ.
 const Primitive primGround(GL_TRIANGLES, 6, 0 * sizeof(GLushort), 0); // 四角形
 const Primitive primTriangles(GL_TRIANGLES, 9, 12 * sizeof(GLushort), 0); // 三角形
+const Primitive primCube(GL_TRIANGLES, 9, 12 * sizeof(GLushort), 0);
 
+// 画像データ.
+const int imageGroundWidth = 8; // 画像の幅.
+const int imageGroundHeight = 8; // 画像の高さ.
+const GLuint X = 0xff'18'18'18; // 黒.
+const GLuint W = 0xff'ff'ff'ff; // 白.
+const GLuint R = 0xff'10'10'e0; // 赤.
+const GLuint B = 0xff'e0'10'10; // 青.
+const GLuint imageGround[imageGroundWidth * imageGroundHeight] = {
+X, B, B, B, X, W, W, W,
+X, B, B, B, X, W, W, W,
+X, B, B, B, X, W, W, W,
+X, X, X, X, X, X, X, X,
+W, W, X, R, R, R, X, W,
+W, W, X, R, R, R, X, W,
+W, W, X, R, R, R, X, W,
+X, X, X, X, X, X, X, X,
+};
 
 /// 頂点シェーダー.
 static const char* vsCode =
 "#version 450 \n"
  "layout(location=0) in vec3 vPosition; \n"
  "layout(location=1) in vec4 vColor; \n"
+"layout(location=2) in vec2 vTexcoord; \n"
  "layout(location=0) out vec4 outColor; \n"
+"layout(location=1) out vec2 outTexcoord; \n"
  "out gl_PerVertex { \n"
  "  vec4 gl_Position; \n"
  "}; \n"
 "layout(location=0) uniform mat4 matTRS; \n"
  "void main() { \n"
 	"  outColor = vColor; \n"	
+	"  outTexcoord = vTexcoord; \n"
 	"  gl_Position = matTRS * vec4(vPosition, 1.0); \n"
  "} \n";
 
 /// フラグメントシェーダー.
-static const GLchar * fsCode =
+static const GLchar* const fsCode =
 "#version 450 \n"
- "layout(location=0) in vec4 inColor; \n"
- "out vec4 fragColor; \n"
- "void main() { \n"
- "  fragColor = inColor; \n"
- "} \n";
+"layout(location=0) in vec4 inColor; \n"
+"layout(location=1) in vec2 inTexcoord; \n"
+"out vec4 fragColor; \n"
+"layout(binding=0) uniform sampler2D texColor; \n"
+"void main() { \n"
+"  vec4 tc = texture(texColor, inTexcoord); \n"
+"  fragColor = inColor * tc; \n"
+"} \n";
+
+/// マップデータ.
+int mapData[10][10] = {
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+{ 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+};
+
 
 /* OpenGLからのメッセージを処理する
 * @param source			メッセージの発信者（OpenGL、Windows、シェーダーなど）
@@ -153,8 +201,10 @@ int main()
 	// VAOを作成する.
 	const GLuint vboPosition = GLContext::CreateBuffer(sizeof(positions), positions);
 	const GLuint vboColor = GLContext::CreateBuffer(sizeof(colors), colors);
+	const GLuint vboTexcoord = GLContext::CreateBuffer(sizeof(texcoords), texcoords);
 	const GLuint ibo = GLContext::CreateBuffer(sizeof(indices), indices);
-	const GLuint vao = GLContext::CreateVertexArray(vboPosition, vboColor, ibo);
+	const GLuint vao = GLContext::CreateVertexArray(
+		vboPosition, vboColor, vboTexcoord, ibo);
 	if (!vao) {
 		return 1;		
 	}
@@ -173,6 +223,28 @@ int main()
 	// 座標変換行列の回転角度.
 	float degree = 0;
 
+	// テクスチャを作成.
+	const GLuint texGround = GLContext::CreateImage2D(
+		imageGroundWidth, imageGroundHeight, imageGround);
+
+	const GLuint texTriangle = GLContext::CreateImage2D(
+		imageGroundWidth, imageGroundHeight, imageGround);
+
+	const GLuint texGreen = GLContext::CreateImage2D(
+		imageGroundWidth, imageGroundHeight, imageGround);
+
+	const GLuint texRoad = GLContext::CreateImage2D(
+		imageGroundWidth, imageGroundHeight, imageGround);
+
+	if (!texGround || !texTriangle) {
+		return 1;
+	}
+
+	// サンプラを作成.
+	 const GLuint sampler = GLContext::CreateSampler(GL_CLAMP_TO_EDGE);
+	if (!sampler) {
+		return 1;		
+	}
 
 	// メインループ
 	while (!glfwWindowShouldClose(window))
@@ -183,7 +255,7 @@ int main()
 
 		glBindVertexArray(vao);
 		glBindProgramPipeline(pipeline);
-
+		glBindSampler(0, sampler);
 
 		float s = sin(glm::radians(120.0));
 		float c = cos(glm::radians(120.0));
@@ -215,22 +287,54 @@ int main()
 		const glm::mat4 matMVP = matProj * matView * matModel;
 		glProgramUniformMatrix4fv(vp, locMatTRS, 1, GL_FALSE, &matMVP[0][0]);
 
+		glBindTextureUnit(0, texGround); // テクスチャを割り当てる.
+
 
 		primGround.Draw();
-		primTriangles.Draw();
 
-		//glBindVertexArray(0);
+		glBindTextureUnit(0, texTriangle); // テクスチャを割り当てる.
+		primTriangles.Draw();
+		primCube.Draw();
+
+		// マップを(-20,-20)-(20,20)の範囲に描画.
+		const GLuint mapTexList[] = { texGreen, texGround, texRoad };
+		for (int y = 0; y < 10; ++y) {
+			for (int x = 0; x < 10; ++x) {
+				    // 四角形が4x4mなので、xとyを4倍した位置に表示する.
+				const glm::vec3 position(x * 4 - 20, 0, y * 4 - 20);
+				
+				        // 行列をシェーダに転送する 
+				const glm::mat4 matModel = glm::translate(glm::mat4(1), position);
+				const glm::mat4 matMVP = matProj * matView * matModel;
+				glProgramUniformMatrix4fv(vp, locMatTRS, 1, GL_FALSE, &matMVP[0][0]);
+				
+				const int textureNo = mapData[y][x];
+				glBindTextureUnit(0, mapTexList[textureNo]); // テクスチャを割り当てる.
+				primGround.Draw();				
+			}			
+		}
+
+		// テクスチャの割り当てを解除.
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindSampler(0, 0);
+		glBindProgramPipeline(0);
+		glBindVertexArray(0);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
 
 	// 後始末.
+	glDeleteSamplers(1, &sampler);
+	glDeleteTextures(1, &texGround);
 	glDeleteProgramPipelines(1, &pipeline);
 	glDeleteProgram(fp);
 	glDeleteProgram(vp);
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &ibo);
+	glDeleteBuffers(1, &vboTexcoord);
 	glDeleteBuffers(1, &vboColor);
 	glDeleteBuffers(1, &vboPosition);
 

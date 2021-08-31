@@ -2,6 +2,7 @@
 *	@file GLContext.cpp
 */
 #include "GLContext.h"
+#include <glm/glm.hpp>
 #include <vector>
 #include <iostream>
 
@@ -20,9 +21,10 @@ namespace GLContext
 	}
 
 	// Vertex Array Objectを作成する
-	GLuint CreateVertexArray(GLuint vboPosition, GLuint vboColor, GLuint ibo)
+	GLuint CreateVertexArray(GLuint vboPosition, GLuint vboColor,
+		GLuint vboTexcoord, GLuint ibo)
 	{
-		if (!vboPosition || !vboColor || !ibo) {
+		if (!vboPosition || !vboColor || !vboTexcoord || !ibo) {
 			std::cerr << "[エラー]" << __func__ << ":バッファオブジェクトが0です。\n";
 			return 0;			
 		}
@@ -45,6 +47,15 @@ namespace GLContext
 		glVertexArrayAttribBinding(id, colorIndex, colorBindingIndex);
 		glVertexArrayVertexBuffer(id, colorBindingIndex, vboColor, 0, sizeof(Color));
 
+		// テクスチャ座標データをバインディングポイントに割り当てる.
+		const GLuint texcoordIndex = 2;
+		const GLuint texcoordBindingIndex = 2;
+		glEnableVertexArrayAttrib(id, texcoordIndex);
+		glVertexArrayAttribFormat(id, texcoordIndex, 2, GL_FLOAT, GL_FALSE, 0);
+		glVertexArrayAttribBinding(id, texcoordIndex, texcoordBindingIndex);
+		glVertexArrayVertexBuffer(
+			id, texcoordBindingIndex, vboTexcoord, 0, sizeof(glm::vec2));
+		
 		glVertexArrayElementBuffer(id, ibo);
 
 		return id;
@@ -121,6 +132,79 @@ namespace GLContext
 			std::cerr << "[エラー]" << __func__ << ":フラグメントシェーダの設定に失敗.\n";
 			glDeleteProgramPipelines(1, &id);
 			return 0;			
+		}
+
+		return id;
+	}
+
+	/**
+	* サンプラ・オブジェクトを作成する.
+	*
+	* @param wrapMode  ラップ・モード.
+	*
+	* @retval 0以外 作成したサンプラ・オブジェクト.
+	* @retval 0     サンプラ・オブジェクトの作成に失敗.
+	*/
+	GLuint CreateSampler(GLenum wrapMode)
+	{
+		glGetError(); // エラー状態をリセット.
+
+		// サンプラ・オブジェクトを作成する.
+		GLuint id;
+		glCreateSamplers(1, &id);
+		if (glGetError() != GL_NO_ERROR) {
+			std::cerr << "[エラー]" << __func__ << "サンプラの作成に失敗\n";
+			glDeleteSamplers(1, &id);
+			return 0;			
+		}
+
+		// ラップ・モードを設定する.
+		 glSamplerParameteri(id, GL_TEXTURE_WRAP_S, wrapMode);
+		glSamplerParameteri(id, GL_TEXTURE_WRAP_T, wrapMode);
+		if (glGetError() != GL_NO_ERROR) {
+			std::cerr << "[エラー]" << __func__ << ":ラップモードではない値が指定された.\n";
+			glDeleteSamplers(1, &id);
+			return 0;			
+		}
+
+		// フィルタを設定する.
+		 glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		if (glGetError() != GL_NO_ERROR) {
+			std::cerr << "[エラー]" << __func__ << ":フィルタではない値が指定された.\n";
+			glDeleteSamplers(1, &id);
+			return 0;			
+		}
+
+		return id;
+	}
+
+	/**
+* 2Dテクスチャを作成する.
+*
+* @param width   画像の幅(ピクセル数).
+* @param height  画像の高さ(ピクセル数).
+* @param data    画像データのアドレス.
+*
+* @retval 0以外  作成したテクスチャ・オブジェクトのID.
+* @retval 0      テクスチャの作成に失敗.
+*/
+	GLuint CreateImage2D(GLsizei width, GLsizei height, const void* data)
+	{
+		glGetError(); // エラー状態をリセット.
+
+		// テクスチャ・オブジェクトを作成し、GPUメモリを確保する.
+		GLuint id;
+		glCreateTextures(GL_TEXTURE_2D, 1, &id);
+		glTextureStorage2D(id, 1, GL_RGBA8, width, height);
+
+		// GPUメモリにデータを転送する.
+		glTextureSubImage2D(id, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		const GLenum result = glGetError();
+		if (result != GL_NO_ERROR) {
+			std::cerr << "[エラー]" << __func__ << "テクスチャの作成に失敗\n";
+			glDeleteTextures(1, &id);
+			return 0;
 		}
 
 		return id;
