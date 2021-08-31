@@ -1,8 +1,6 @@
-﻿  glad.c
-  GLContext.cpp
+﻿  GLContext.cpp
   Main.cpp
-C:\WorksFiles\C++\Jugyou\OpenGL2021\Src\Main.cpp(260,11): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
-C:\WorksFiles\C++\Jugyou\OpenGL2021\Src\Main.cpp(261,11): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
-  Primitive.cpp
+C:\WorksFiles\C++\Jugyou\OpenGL2021\Src\Main.cpp(308,11): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\WorksFiles\C++\Jugyou\OpenGL2021\Src\Main.cpp(309,11): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
   コードを生成中...
   OpenGL3D2021.vcxproj -> C:\WorksFiles\C++\Jugyou\OpenGL2021\x64\Debug\OpenGL3D2021.exe

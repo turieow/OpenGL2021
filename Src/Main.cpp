@@ -33,6 +33,18 @@ const Position positions[] =
 	{-0.33f, -0.5f, 0.5f },
 	{ 0.33f, -0.5f, 0.5f },
 	{ 0.0f,  0.5f, 0.5f },
+
+	// 立方体
+    { 0, 0, 0}, { 1, 0, 0}, { 1, 0, 1}, { 0, 0, 1},
+    { 0, 1, 0}, { 1, 1, 0}, { 1, 1, 1}, { 0, 1, 1},
+
+	// 木(葉)
+	{ 0.0f, 3.0f, 0.0f}, // 0
+	{ 0.0f, 1.0f,-1.0f}, // 1
+	{-1.0f, 1.0f, 0.0f}, // 2
+	{ 0.0f, 1.0f, 1.0f}, // 3
+	{ 1.0f, 1.0f, 0.0f}, // 4
+	{ 0.0f, 1.0f,-1.0f}, // 5
 };
 
 const Color colors[]
@@ -61,6 +73,18 @@ const glm::vec2 texcoords[] = {
 	{ 4.0f,-4.0f },
 	{ 4.0f, 4.0f },
 	{-4.0f, 4.0f },
+
+	// 立方体
+    { 0.0f, 0.0f}, { 0.0f, 0.0f}, { 0.0f, 0.0f}, { 0.0f, 0.0f},
+    { 0.0f, 0.0f}, { 0.0f, 0.0f}, { 0.0f, 0.0f}, { 0.0f, 0.0f},
+	
+	  // 木(葉)
+	{ 0.5f, 1.0f},
+	{ 0.0f, 0.5f},
+	{ 0.25f, 0.5f},
+	{ 0.5f, 0.5f},
+	{ 0.75f, 0.5f},
+	{ 1.0f, 0.5f},
 };
 
 // インデックスデータ.
@@ -68,12 +92,22 @@ const glm::vec2 texcoords[] = {
 	0, 1, 2, 2, 3, 0,
 	4, 5, 6, 7, 8, 9,
 	12,11,10,15,14,13,18,17,16,
+
+	// 立方体
+	 0, 1, 2, 2, 3, 0, 4, 5, 1, 1, 0, 4,
+	 5, 6, 2, 2, 1, 5, 6, 7, 3, 3, 2, 6,
+	7, 4, 0, 0, 3, 7, 7, 6, 5, 5, 4, 7,
+	
+	 // 木
+	0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 1, 4, 3, 3, 2, 1, // 葉
 	};
 
 // 描画データ.
 const Primitive primGround(GL_TRIANGLES, 6, 0 * sizeof(GLushort), 0); // 四角形
 const Primitive primTriangles(GL_TRIANGLES, 9, 12 * sizeof(GLushort), 0); // 三角形
-const Primitive primCube(GL_TRIANGLES, 9, 12 * sizeof(GLushort), 0);
+const Primitive primCube(GL_TRIANGLES, 36, 21 * sizeof(GLushort), 19); // 立方体
+const Primitive primTree(GL_TRIANGLES, 36, 21 * sizeof(GLushort), 19); // 木
+const Primitive primWarehouse(GL_TRIANGLES, 36, 21 * sizeof(GLushort), 19); // 木
 
 // 画像データ.
 const int imageGroundWidth = 8; // 画像の幅.
@@ -135,6 +169,21 @@ int mapData[10][10] = {
 { 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
 { 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
 { 0, 0, 0, 1, 2, 2, 1, 0, 0, 0},
+};
+
+// 木を植える位置を表す二次元配列
+int objectMapData[10][10] =
+{
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+	{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
 };
 
 
@@ -224,17 +273,16 @@ int main()
 	float degree = 0;
 
 	// テクスチャを作成.
-	const GLuint texGround = GLContext::CreateImage2D(
-		imageGroundWidth, imageGroundHeight, imageGround);
-
-	const GLuint texTriangle = GLContext::CreateImage2D(
-		imageGroundWidth, imageGroundHeight, imageGround);
-
-	const GLuint texGreen = GLContext::CreateImage2D(
-		imageGroundWidth, imageGroundHeight, imageGround);
-
-	const GLuint texRoad = GLContext::CreateImage2D(
-		imageGroundWidth, imageGroundHeight, imageGround);
+	const GLuint texGround = GLContext::CreateImage2D("Res/T_Ground.tga");
+	const GLuint texTriangle = GLContext::CreateImage2D("Res/T_Triangle.tga");
+	const GLuint texGreen = GLContext::CreateImage2D(8, 8, imageGround,
+		GL_RGBA, GL_UNSIGNED_BYTE);
+	const GLuint texRoad = GLContext::CreateImage2D(8, 8, imageGround,
+		GL_RGBA, GL_UNSIGNED_BYTE);
+	const GLuint texTree = GLContext::CreateImage2D(8, 8, imageGround,
+		GL_RGBA, GL_UNSIGNED_BYTE);
+	const GLuint texWarehouse = GLContext::CreateImage2D(8, 8, imageGround,
+		GL_RGBA, GL_UNSIGNED_BYTE);
 
 	if (!texGround || !texTriangle) {
 		return 1;
@@ -295,6 +343,42 @@ int main()
 		glBindTextureUnit(0, texTriangle); // テクスチャを割り当てる.
 		primTriangles.Draw();
 		primCube.Draw();
+
+		// マップに配置する物体の表示データ.
+		struct ObjectData {
+			Primitive prim; // 表示するプリミティブ.
+			GLuint tex;     // プリミティブに貼るテクスチャ.			
+		};
+
+		// 描画する物体のリスト.
+		const ObjectData objectList[] = {
+		{ Primitive(), 0 },    // なし.
+		{ primTree, texTree }, // 木.
+		{ primWarehouse, texWarehouse }, // 建物
+		};
+
+		// 木を植える.
+		for (int y = 0; y < 10; ++y) {
+			for (int x = 0; x < 10; ++x) {
+				    // 描画する物体の番号を取得.
+				const int objectNo = objectMapData[y][x];
+				if (objectNo <= 0 || objectNo >= std::size(objectList)) {
+					continue;					
+				}
+				const ObjectData p = objectList[objectNo];
+				
+				        // 四角形が4x4mなので、xとyを4倍した位置に表示する.
+				const glm::vec3 position(x * 4 - 20, 0, y * 4 - 20);
+				
+				        // 行列をシェーダに転送する 
+				const glm::mat4 matModel = glm::translate(glm::mat4(1), position);
+				const glm::mat4 matMVP = matProj * matView * matModel;
+				glProgramUniformMatrix4fv(vp, locMatTRS, 1, GL_FALSE, &matMVP[0][0]);
+				
+				glBindTextureUnit(0, p.tex); // テクスチャを割り当てる.
+				p.prim.Draw();
+			}
+		}
 
 		// マップを(-20,-20)-(20,20)の範囲に描画.
 		const GLuint mapTexList[] = { texGreen, texGround, texRoad };
