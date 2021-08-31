@@ -16,6 +16,9 @@
     <Filter Include="ソース ファイル\glad">
       <UniqueIdentifier>{bcafa47d-7efd-4fd5-9dc2-eac87621e0b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Actor">
+      <UniqueIdentifier>{87bb1cac-105e-46fd-9ab7-21b88b1a234f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main.cpp">
@@ -33,6 +36,39 @@
     <ClCompile Include="Src\ProgramPipeline.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Actor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GameEngine.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GameManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GameMap.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Sampler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Texture.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Actor\BulletActor.cpp">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Actor\ElevatorActor.cpp">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Actor\PlayerActor.cpp">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Actor\RandomMovingEnemyActor.cpp">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Actor\T34TankActor.cpp">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -43,6 +79,12 @@
       <Filter>リソース ファイル</Filter>
     </None>
     <None Include="Res\VertexLighting.vert">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Res\FragmentLighting.frag">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Res\FragmentLightting.vert">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>
@@ -61,6 +103,39 @@
     </ClInclude>
     <ClInclude Include="Src\ProgramPipeline.h">
       <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GameEngine.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GameManager.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GameMap.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Sampler.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Texture.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor\BulletActor.h">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor\ElevatorActor.h">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor\PlayerActor.h">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor\RandomMovingEnemyActor.h">
+      <Filter>ソース ファイル\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor\T34TankActor.h">
+      <Filter>ソース ファイル\Actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
