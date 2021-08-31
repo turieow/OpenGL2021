@@ -7,6 +7,8 @@
 */
 #include<glad/glad.h>
 #include "GLContext.h"
+#include "Primitive.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include<GLFW/glfw3.h>
 #include <string>
 #include <iostream>
@@ -15,10 +17,11 @@
 // 座標データ
 const Position positions[] =
 {
-	{-0.3f, -0.3f, 0.4f},
-	{ 0.2f, -0.3f, 0.4f},
-	{ 0.2f,  0.5f, 0.4f},
-	{-0.3f,  0.5f, 0.4f},
+	// 地面
+	{-20.0f, 0.0f, 20.0f},
+	{ 20.0f, 0.0f, 20.0f},
+	{ 20.0f, 0.0f,-20.0f},
+	{-20.0f, 0.0f,-20.0f},
 
 	{-0.2f, -0.5f, 0.1f},
 	{ 0.3f, -0.5f, 0.1f},
@@ -55,7 +58,13 @@ const Color colors[]
 	const GLushort indices[] = {
 	0, 1, 2, 2, 3, 0,
 	4, 5, 6, 7, 8, 9,
+	12,11,10,15,14,13,18,17,16,
 	};
+
+// 描画データ.
+const Primitive primGround(GL_TRIANGLES, 6, 0 * sizeof(GLushort), 0); // 四角形
+const Primitive primTriangles(GL_TRIANGLES, 9, 12 * sizeof(GLushort), 0); // 三角形
+
 
 /// 頂点シェーダー.
 static const char* vsCode =
@@ -66,15 +75,10 @@ static const char* vsCode =
  "out gl_PerVertex { \n"
  "  vec4 gl_Position; \n"
  "}; \n"
+"layout(location=0) uniform mat4 matTRS; \n"
  "void main() { \n"
- "  outColor = vColor; \n"
-	"  float s = sin(1.0); \n"
-	 "  float c = cos(1.0); \n"
-	 "  vec3 p = vPosition; \n"
-	 "  p.x = vPosition.x * c - vPosition.y * s; \n"
-	 "  p.y = vPosition.x * s + vPosition.y * c; \n"
-	"  gl_Position.xyz = p * vec3(0.5, 1.5, 1.0) + vec3(-0.3,-0.5, 0.0); \n"
- "  gl_Position.w = 1.0; \n"
+	"  outColor = vColor; \n"	
+	"  gl_Position = matTRS * vec4(vPosition, 1.0); \n"
  "} \n";
 
 /// フラグメントシェーダー.
@@ -163,19 +167,59 @@ int main()
 		return 1;		
 	}
 
+	// uniform変数の位置.
+	const GLint locMatTRS = 0;
+
+	// 座標変換行列の回転角度.
+	float degree = 0;
+
+
 	// メインループ
 	while (!glfwWindowShouldClose(window))
 	{
+		glEnable(GL_DEPTH_TEST); // 深度バッファを有効にする.
 		glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindVertexArray(vao);
 		glBindProgramPipeline(pipeline);
+
+
+		float s = sin(glm::radians(120.0));
+		float c = cos(glm::radians(120.0));
+		glm::mat4 matT = glm::mat4(1);
+		matT[3] = glm::vec4(-0.3, -0.5, 0.0, 1.0);
+		glm::mat4 matS = glm::mat4(1);
+		matS[0][0] = 0.5;
+		matS[1][1] = 1.5;
+		glm::mat4 matR = glm::mat4(1);
+		matR[0][0] = c;
+		matR[0][1] = -s;
+		matR[1][0] = s;
+		matR[1][1] = c;
+
+		// プロジェクション行列を作成.
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		const float aspectRatio = static_cast<float>(w) / static_cast<float>(h);
+		const glm::mat4 matProj =
+		glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 200.0f);
 		
-		glDrawElements(
-			GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_SHORT, 0);
-		glBindProgramPipeline(0);
-		glBindVertexArray(0);
+		// ビュー行列を作成.
+		const glm::mat4 matView =
+			glm::lookAt(glm::vec3(0, 20, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+
+		// 行列をシェーダに転送する.
+		const glm::mat4 matModel = glm::mat4(1);
+		const glm::mat4 matMVP = matProj * matView * matModel;
+		glProgramUniformMatrix4fv(vp, locMatTRS, 1, GL_FALSE, &matMVP[0][0]);
+
+
+		primGround.Draw();
+		primTriangles.Draw();
+
+		//glBindVertexArray(0);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
