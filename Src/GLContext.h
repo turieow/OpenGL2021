@@ -21,7 +21,9 @@ struct Color
 namespace GLContext
 {
 	GLuint CreateBuffer(GLsizeiptr size, const GLvoid* data);
-	GLuint CreateVErtexArray(GLuint vboPosition, GLuint vboColor);
+	GLuint CreateVertexArray(GLuint vboPosition, GLuint vboColor, GLuint ibo);
+	GLuint CreateProgram(GLenum type, const GLchar* code);
+	GLuint CreatePipeline(GLuint vp, GLuint fp);
 }// namespace GLContext
 
 #endif // ! GLCONTEXT_H_INCLUDED
