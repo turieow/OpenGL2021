@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <cstdint>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <iostream>
 
@@ -24,9 +25,9 @@ namespace GLContext
 
 	// Vertex Array Objectを作成する
 	GLuint CreateVertexArray(GLuint vboPosition, GLuint vboColor,
-		GLuint vboTexcoord, GLuint ibo)
+		GLuint vboTexcoord, GLuint vboNormal, GLuint ibo)
 	{
-		if (!vboPosition || !vboColor || !vboTexcoord || !ibo) {
+		if (!vboPosition || !vboColor || !vboTexcoord || !vboNormal || !ibo) {
 			std::cerr << "[エラー]" << __func__ << ":バッファオブジェクトが0です。\n";
 			return 0;			
 		}
@@ -94,6 +95,29 @@ namespace GLContext
 			return 0;
 		}
 		return program;
+	}
+
+/**
+* ファイルからシェーダー・プログラムを作成する.
+*
+* @param type     シェーダーの種類.
+* @param filename シェーダーファイル名.
+*
+* @retval 0より大きい 作成したプログラム・オブジェクト.
+* @retval 0           プログラム・オブジェクトの作成に失敗.
+*/
+	GLuint CreateProgramFromFile(GLenum type, const char* filename)
+	{
+		std::ifstream ifs(filename);
+		if (!ifs) {
+			std::cerr << "[エラー]" << __func__ << ":" << filename <<
+				"を開けません.\n";
+			return 0;
+		}
+
+		std::stringstream ss;
+		ss << ifs.rdbuf();
+		return GLContext::CreateProgram(type, ss.str().c_str());
 	}
 
 	/**

@@ -65,9 +65,10 @@ PrimitiveBuffer::PrimitiveBuffer(GLsizei maxVertexCount, GLsizei maxIndexCount)
 	vboPosition = GLContext::CreateBuffer(sizeof(glm::vec3) * maxVertexCount, nullptr);
 	vboColor = GLContext::CreateBuffer(sizeof(glm::vec4) * maxVertexCount, nullptr);
 	vboTexcoord = GLContext::CreateBuffer(sizeof(glm::vec2) * maxVertexCount, nullptr);
+	vboNormal = GLContext::CreateBuffer(sizeof(glm::vec3) * maxVertexCount, nullptr);
 	ibo = GLContext::CreateBuffer(sizeof(GLushort) * maxIndexCount, nullptr);
-	vao = GLContext::CreateVertexArray(vboPosition, vboColor, vboTexcoord, ibo);
-	if (!vboPosition || !vboColor || !vboTexcoord || !ibo || !vao) {
+	vao = GLContext::CreateVertexArray(vboPosition, vboColor, vboTexcoord, vboNormal, ibo);
+	if (!vboPosition || !vboColor || !vboTexcoord || !vboNormal || !ibo || !vao) {
 		std::cerr << "[エラー]" << __func__ << ": VAOの作成に失敗.\n";
 
 	}
@@ -87,6 +88,7 @@ PrimitiveBuffer::~PrimitiveBuffer()
 {
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &ibo);
+	glDeleteBuffers(1, &vboNormal);
 	glDeleteBuffers(1, &vboTexcoord);
 	glDeleteBuffers(1, &vboColor);
 	glDeleteBuffers(1, &vboPosition);
@@ -99,6 +101,7 @@ PrimitiveBuffer::~PrimitiveBuffer()
 * @param pPosition   座標データへのポインタ.
 * @param pColor      色データへのポインタ.
 * @param pTexcoord   テクスチャ座標データへのポインタ.
+*  @param pNormal     法線データへのポインタ.
 * @param indexCount  追加するインデックスデータの数.
 * @param pIndex      インデックスデータへのポインタ.
 *
@@ -106,7 +109,7 @@ PrimitiveBuffer::~PrimitiveBuffer()
 * @retval false 追加に失敗.
 */
 bool PrimitiveBuffer::Add(size_t vertexCount, const glm::vec3* pPosition,
-	const glm::vec4* pColor, const glm::vec2* pTexcoord,
+	const glm::vec4* pColor, const glm::vec2* pTexcoord, const glm::vec3* pNormal,
 	size_t indexCount, const GLushort* pIndex)
 {
 	// エラーチェック.
@@ -184,15 +187,18 @@ bool PrimitiveBuffer::AddFromObjFile(const char* filename)
 	// データ読み取り用の配列を準備
 	std::vector<glm::vec3> objPositions; // OBJファイルの頂点座標
 	std::vector<glm::vec2> objTexcoords; // OBJファイルのテクスチャ座標
+	std::vector<glm::vec3> objNormals;   // OBJファイルの法線
 	struct Index {
-		int v, vt;
-
+		int v = 0;  // 頂点座標インデックス
+		int vt = 0; // テクスチャ座標インデックス
+		int vn = 0; // 法線インデックス
 	};
 	std::vector<Index> objIndices; // OBJファイルのインデックス
 
 		  // 配列用のメモリを予約.
 	objPositions.reserve(100'000);
 	objTexcoords.reserve(100'000);
+	objNormals.reserve(100'000);
 	objIndices.reserve(100'000);
 
 	// ファイルからモデルのデータを読み込む.
@@ -235,15 +241,38 @@ bool PrimitiveBuffer::AddFromObjFile(const char* filename)
 					"  " << filename << "(" << lineNo << "行目): " << line << "\n";
 			}
 			objTexcoords.push_back(vt);
-
 		}
+		
+		else if (type == "vn") { // 法線
+			glm::vec3 vn(0);
+			if (sscanf(p, "%f %f %f", &vn.x, &vn.y, &vn.z) != 3) {
+				std::cerr << "[警告]" << __func__ << ":法線の読み取りに失敗.\n" <<
+					"  " << filename << "(" << lineNo << "行目): " << line << "\n";
+			}
+			objNormals.push_back(vn);
+		}
+
 		else if (type == "f") { // 面
 			Index f[3];
-			const int n = sscanf(p, "%d/%d %d/%d %d/%d",
+			bool isSuccess = false; // true=解析成功 false=解析失敗
+			
+			// 「頂点座標/テクスチャ座標」バージョンの解析.
+			if (sscanf(p, " %d/%d %d/%d %d/%d",
 				&f[0].v, &f[0].vt,
 				&f[1].v, &f[1].vt,
-				&f[2].v, &f[2].vt);
-			if (n != 6) {
+				&f[2].v, &f[2].vt) == 6) { // データは6個
+				isSuccess = true; // 解析成功				
+			}
+
+			// 「頂点座標/テクスチャ座標/法線」バージョンの解析.
+			else if (sscanf(p, " %d/%d/%d %d/%d/%d %d/%d/%d",
+					&f[0].v, &f[0].vt, &f[0].vn,
+					&f[1].v, &f[1].vt, &f[1].vn,
+					&f[2].v, &f[2].vt, &f[2].vn) == 9) { // データは9個
+				isSuccess = true; // 解析成功
+			}
+				
+			if (!isSuccess) {
 				std::cerr << "[警告]" << __func__ << ":面データの読み取りに失敗.\n"
 					"  " << filename << "(" << lineNo << "行目): " << line << "\n";
 
@@ -265,12 +294,14 @@ bool PrimitiveBuffer::AddFromObjFile(const char* filename)
 	std::vector<glm::vec3> positions; // OpenGL用の頂点座標
 	std::vector<glm::vec4> colors;    // OpenGL用の色
 	std::vector<glm::vec2> texcoords; // OpenGL用のテクスチャ座標
+	std::vector<glm::vec3> normals;   // OpenGL用の法線
 	std::vector<GLushort> indices;    // OpenGL用のインデックス
 
 	// データ変換用のメモリを確保.
 	const size_t indexCount = objIndices.size();
 	positions.reserve(indexCount);
 	texcoords.reserve(indexCount);
+	normals.reserve(indexCount);
 	indices.reserve(indexCount);
 
 	// OBJファイルのデータをOpenGLのデータに変換.
@@ -303,6 +334,47 @@ bool PrimitiveBuffer::AddFromObjFile(const char* filename)
 				"  " << filename << "\n";
 			texcoords.push_back(glm::vec2(0));
 		}
+
+		// 法線インデックスがないデータの場合、なんとかして法線を用意する.
+		if (objIndices[i].vn == 0) {
+			// 面の頂点座標を配列pに取得.
+			glm::vec3 p[3];
+			const size_t n = (i / 3);
+			for (size_t j = 0; j < 3; ++j) {
+				const int v = objIndices[n * 3 + j].v - 1;
+				p[j] = objPositions[v];				
+			}
+
+			// 辺aと辺bを計算.
+			const glm::vec3 a = p[1] - p[0];
+			const glm::vec3 b = p[2] - p[0];
+
+			// aとbに垂直なベクトルを計算.
+			glm::vec3 normal = glm::cross(a, b);
+
+			// 垂直ベクトルの長さを計算.
+			const float length = sqrt(
+			normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+			
+			// 垂直ベクトルを単位ベクトルに変換.
+			normal = normal / length;
+
+			normals.push_back(normal);
+		}				
+		else {
+			// 法線を変換.
+			const int vn = objIndices[i].vn - 1;
+			if (vn < static_cast<int>(objNormals.size())) {
+				normals.push_back(objNormals[vn]);
+			}
+
+			else {
+				std::cerr << "[警告]" << __func__ << ":法線インデックス" << vn <<
+					"は範囲[0, " << objNormals.size() << ")の外を指しています.\n" <<
+					"  " << filename << "\n";
+				normals.push_back(glm::vec3(0, 1, 0));
+			}
+		}
 	}
 
 	// 色データを設定.
@@ -310,7 +382,7 @@ bool PrimitiveBuffer::AddFromObjFile(const char* filename)
 
 	// プリミティブを追加する.
 	const bool result = Add(positions.size(), positions.data(), colors.data(),
-		texcoords.data(), indices.size(), indices.data());
+		texcoords.data(), normals.data(), indices.size(), indices.data());
 	if (result) {
 		std::cout << "[情報]" << __func__ << ":" << filename << "(頂点数=" <<
 			positions.size() << " インデックス数=" << indices.size() << ")\n";

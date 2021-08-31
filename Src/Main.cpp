@@ -8,6 +8,7 @@
 #include<glad/glad.h>
 #include "GLContext.h"
 #include "Primitive.h"
+#include "ProgramPipeline.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include<GLFW/glfw3.h>
 #include <string>
@@ -146,35 +147,6 @@ W, W, X, R, R, R, X, W,
 X, X, X, X, X, X, X, X,
 };
 
-/// 頂点シェーダー.
-static const char* vsCode =
-"#version 450 \n"
- "layout(location=0) in vec3 vPosition; \n"
- "layout(location=1) in vec4 vColor; \n"
-"layout(location=2) in vec2 vTexcoord; \n"
- "layout(location=0) out vec4 outColor; \n"
-"layout(location=1) out vec2 outTexcoord; \n"
- "out gl_PerVertex { \n"
- "  vec4 gl_Position; \n"
- "}; \n"
-"layout(location=0) uniform mat4 matTRS; \n"
- "void main() { \n"
-	"  outColor = vColor; \n"	
-	"  outTexcoord = vTexcoord; \n"
-	"  gl_Position = matTRS * vec4(vPosition, 1.0); \n"
- "} \n";
-
-/// フラグメントシェーダー.
-static const GLchar* const fsCode =
-"#version 450 \n"
-"layout(location=0) in vec4 inColor; \n"
-"layout(location=1) in vec2 inTexcoord; \n"
-"out vec4 fragColor; \n"
-"layout(binding=0) uniform sampler2D texColor; \n"
-"void main() { \n"
-"  vec4 tc = texture(texColor, inTexcoord); \n"
-"  fragColor = inColor * tc; \n"
-"} \n";
 
 /// マップデータ.
 int mapData[10][10] = {
@@ -276,15 +248,14 @@ int main()
 	primitiveBuffer.AddFromObjFile("Res/Warehouse.obj");
 
 	// パイプライン・オブジェクトを作成する.
-	 const GLuint vp = GLContext::CreateProgram(GL_VERTEX_SHADER, vsCode);
-	const GLuint fp = GLContext::CreateProgram(GL_FRAGMENT_SHADER, fsCode);
-	const GLuint pipeline = GLContext::CreatePipeline(vp, fp);
-	if (!pipeline) {
+	ProgramPipeline pipeline("Res/VertexLighting.vert", "Res/Simple.frag");
+	if (!pipeline.IsValid()) {
 		return 1;		
 	}
 
 	// uniform変数の位置.
 	const GLint locMatTRS = 0;
+	const GLint locMatModel = 1; // モデル行列用ユニフォーム変数の位置
 
 	// 座標変換行列の回転角度.
 	float degree = 0;
@@ -319,7 +290,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		primitiveBuffer.BindVertexArray();
-		glBindProgramPipeline(pipeline);
+		pipeline.Bind();
 		glBindSampler(0, sampler);
 
 		float s = sin(glm::radians(120.0));
@@ -350,12 +321,12 @@ int main()
 		// 行列をシェーダに転送する.
 		const glm::mat4 matModel = glm::mat4(1);
 		const glm::mat4 matMVP = matProj * matView * matModel;
-		glProgramUniformMatrix4fv(vp, locMatTRS, 1, GL_FALSE, &matMVP[0][0]);
+		pipeline.SetUniform(locMatTRS, matMVP);		
+		pipeline.SetUniform(locMatModel, matModel);
 
-		glBindTextureUnit(0, texGround); // テクスチャを割り当てる.
 
-
-		primGround.Draw();
+		glBindTextureUnit(0, p.tex); // テクスチャを割り当てる.
+		p.prim.Draw();
 
 		glBindTextureUnit(0, texTriangle); // テクスチャを割り当てる.
 		primTriangles.Draw();
@@ -420,7 +391,7 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindSampler(0, 0);
-		glBindProgramPipeline(0);
+		pipeline.Unbind();
 		primitiveBuffer.UnbindVertexArray();
 
 		glfwPollEvents();
@@ -429,10 +400,7 @@ int main()
 
 	// 後始末.
 	glDeleteSamplers(1, &sampler);
-	glDeleteTextures(1, &texGround);
-	glDeleteProgramPipelines(1, &pipeline);
-	glDeleteProgram(fp);
-	glDeleteProgram(vp);
+	glDeleteTextures(1, &texGround);	
 
 	// GLFWの終了
 	glfwTerminate();
