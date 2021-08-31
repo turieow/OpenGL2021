@@ -8,18 +8,18 @@
 /**
 * コンストラクタ.
 *
-* @param vsCode  頂点シェーダーファイル名.
-* @param fsCode  フラグメントシェーダーファイル名.
+* @param vsCode  頂点シェーダファイル名.
+* @param fsCode  フラグメントシェーダファイル名.
 */
 ProgramPipeline::ProgramPipeline(const char* vsCode, const char* fsCode)
 {
-	vp = GLContext::CreateProgramFromFile(GL_VERTEX_SHADER, vsCode);
-	fp = GLContext::CreateProgramFromFile(GL_FRAGMENT_SHADER, fsCode);
-	pipeline = GLContext::CreatePipeline(vp, fp);
-	if (pipeline) {
-		std::cout << "[情報]プログラムパイプラインを作成(id=" << pipeline <<
-			", vp=" << vsCode << ", fp=" << fsCode << ")\n";
-	}
+    vp = GLContext::CreateProgramFromFile(GL_VERTEX_SHADER, vsCode);
+    fp = GLContext::CreateProgramFromFile(GL_FRAGMENT_SHADER, fsCode);
+    pipeline = GLContext::CreatePipeline(vp, fp);
+    if (pipeline) {
+        std::cout << "[情報] プログラムパイプラインを作成(id=" << pipeline <<
+            ", vp=" << vsCode << ", fp=" << fsCode << ")\n";
+    }
 }
 
 /**
@@ -27,13 +27,12 @@ ProgramPipeline::ProgramPipeline(const char* vsCode, const char* fsCode)
 */
 ProgramPipeline::~ProgramPipeline()
 {
-	if (pipeline) {
-		std::cout << "[情報]プログラムパイプラインを削除(id=" << pipeline << ")\n";
-	}
-
-	glDeleteProgramPipelines(1, &pipeline);
-	glDeleteProgram(fp);
-	glDeleteProgram(vp);
+    if (pipeline) {
+        std::cout << "[情報]プログラムパイプラインを削除(id=" << pipeline << ")\n";
+    }
+    glDeleteProgramPipelines(1, &pipeline);
+    glDeleteProgram(fp);
+    glDeleteProgram(vp);
 }
 
 /**
@@ -44,7 +43,7 @@ ProgramPipeline::~ProgramPipeline()
 */
 bool ProgramPipeline::IsValid() const
 {
-	return pipeline;
+    return pipeline;
 }
 
 /**
@@ -58,15 +57,14 @@ bool ProgramPipeline::IsValid() const
 */
 bool ProgramPipeline::SetUniform(GLint location, const glm::mat4& data) const
 {
-	glGetError(); // エラー状態をリセット.
+    glGetError(); // エラー状態をリセット.
 
-	glProgramUniformMatrix4fv(vp, location, 1, GL_FALSE, &data[0][0]);
-	if (glGetError() != GL_NO_ERROR) {
-		std::cerr << "[エラー]" << __func__ << ":ユニフォーム変数の設定に失敗.\n";
-		return false;
-	}
-
-	return true;
+    glProgramUniformMatrix4fv(vp, location, 1, GL_FALSE, &data[0][0]);
+    if (glGetError() != GL_NO_ERROR) {
+        std::cerr << "[エラー]" << __func__ << ":ユニフォーム変数の設定に失敗.\n";
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -74,7 +72,7 @@ bool ProgramPipeline::SetUniform(GLint location, const glm::mat4& data) const
 */
 void ProgramPipeline::Bind() const
 {
-	glBindProgramPipeline(pipeline);
+    glBindProgramPipeline(pipeline);
 }
 
 /**
@@ -82,5 +80,5 @@ void ProgramPipeline::Bind() const
 */
 void ProgramPipeline::Unbind() const
 {
-	glBindProgramPipeline(0);
+    glBindProgramPipeline(0);
 }

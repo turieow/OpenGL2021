@@ -1,5 +1,5 @@
-/*
-*	@file GLContext.cpp
+ï»¿/**
+* @file GLContext.cpp
 */
 #include "GLContext.h"
 #include <glm/glm.hpp>
@@ -9,324 +9,339 @@
 #include <vector>
 #include <iostream>
 
-/*
-*	OpenGLƒRƒ“ƒeƒLƒXƒg‚ÉŠÖ‚·‚é‹@”\‚ğŠi”[‚·‚é–¼‘O‹óŠÔ
-*/
-namespace GLContext
-{
-	// ƒoƒbƒtƒ@ƒIƒuƒWƒFƒNƒg‚ğì¬‚·‚é
-	GLuint CreateBuffer(GLsizeiptr size, const GLvoid* data)
-	{
-		GLuint id = 0;
-		glCreateBuffers(1, &id);
-		glNamedBufferStorage(id, size, data, 0);
-		return id;
-	}
-
-	// Vertex Array Object‚ğì¬‚·‚é
-	GLuint CreateVertexArray(GLuint vboPosition, GLuint vboColor,
-		GLuint vboTexcoord, GLuint vboNormal, GLuint ibo)
-	{
-		if (!vboPosition || !vboColor || !vboTexcoord || !vboNormal || !ibo) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":ƒoƒbƒtƒ@ƒIƒuƒWƒFƒNƒg‚ª0‚Å‚·B\n";
-			return 0;			
-		}
-
-		GLuint id = 0;
-		glCreateVertexArrays(1, &id);
-
-		const GLuint positionIndex = 0;
-		const GLuint positionBindingIndex = 0;
-		glEnableVertexArrayAttrib(id, positionIndex);
-		glVertexArrayAttribFormat(id, positionIndex, 3, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribBinding(id, positionIndex, positionBindingIndex);
-		glVertexArrayVertexBuffer(
-			id, positionBindingIndex, vboPosition, 0, sizeof(Position));
-
-		const GLuint colorIndex = 1;
-		const GLuint colorBindingIndex = 1;
-		glEnableVertexArrayAttrib(id, colorIndex);
-		glVertexArrayAttribFormat(id, colorIndex, 4, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribBinding(id, colorIndex, colorBindingIndex);
-		glVertexArrayVertexBuffer(id, colorBindingIndex, vboColor, 0, sizeof(Color));
-
-		// ƒeƒNƒXƒ`ƒƒÀ•Wƒf[ƒ^‚ğƒoƒCƒ“ƒfƒBƒ“ƒOƒ|ƒCƒ“ƒg‚ÉŠ„‚è“–‚Ä‚é.
-		const GLuint texcoordIndex = 2;
-		const GLuint texcoordBindingIndex = 2;
-		glEnableVertexArrayAttrib(id, texcoordIndex);
-		glVertexArrayAttribFormat(id, texcoordIndex, 2, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribBinding(id, texcoordIndex, texcoordBindingIndex);
-		glVertexArrayVertexBuffer(
-			id, texcoordBindingIndex, vboTexcoord, 0, sizeof(glm::vec2));
-		
-		glVertexArrayElementBuffer(id, ibo);
-
-		return id;
-	}
-
-	/**
-	* ƒVƒF[ƒ_[EƒvƒƒOƒ‰ƒ€‚ğƒrƒ‹ƒh‚·‚é.
-	*
-	* @param type ƒVƒF[ƒ_[‚Ìí—Ş.
-	* @param code ƒVƒF[ƒ_[EƒvƒƒOƒ‰ƒ€‚Ö‚Ìƒ|ƒCƒ“ƒ^.
-	*
-	* @retval 0‚æ‚è‘å‚«‚¢ ì¬‚µ‚½ƒvƒƒOƒ‰ƒ€EƒIƒuƒWƒFƒNƒg.
-	* @retval 0          ƒvƒƒOƒ‰ƒ€EƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s.
-	*/
-	GLuint CreateProgram(GLenum type, const GLchar* code)
-	{
-		GLuint program = glCreateShaderProgramv(type, 1, &code);
-
-		GLint status = 0;
-		glGetProgramiv(program, GL_LINK_STATUS, &status);
-		if (status == GL_FALSE) {
-			GLint infoLen = 0;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
-			if (infoLen) {
-				std::vector<char> buf;
-				buf.resize(infoLen);
-				if ((int)buf.size() >= infoLen) {
-					glGetProgramInfoLog(program, infoLen, nullptr, buf.data());
-					std::cerr << "[ƒGƒ‰[]" << __func__ <<
-						":ƒVƒF[ƒ_[‚Ìƒrƒ‹ƒh‚É¸”s.\n" << buf.data() << "\n";
-				}
-			}
-			glDeleteProgram(program);
-			return 0;
-		}
-		return program;
-	}
-
 /**
-* ƒtƒ@ƒCƒ‹‚©‚çƒVƒF[ƒ_[EƒvƒƒOƒ‰ƒ€‚ğì¬‚·‚é.
-*
-* @param type     ƒVƒF[ƒ_[‚Ìí—Ş.
-* @param filename ƒVƒF[ƒ_[ƒtƒ@ƒCƒ‹–¼.
-*
-* @retval 0‚æ‚è‘å‚«‚¢ ì¬‚µ‚½ƒvƒƒOƒ‰ƒ€EƒIƒuƒWƒFƒNƒg.
-* @retval 0           ƒvƒƒOƒ‰ƒ€EƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s.
+* OpenGLã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã«é–¢ã™ã‚‹æ©Ÿèƒ½ã‚’æ ¼ç´ã™ã‚‹åå‰ç©ºé–“.
 */
-	GLuint CreateProgramFromFile(GLenum type, const char* filename)
-	{
-		std::ifstream ifs(filename);
-		if (!ifs) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":" << filename <<
-				"‚ğŠJ‚¯‚Ü‚¹‚ñ.\n";
-			return 0;
-		}
+namespace GLContext {
 
-		std::stringstream ss;
-		ss << ifs.rdbuf();
-		return GLContext::CreateProgram(type, ss.str().c_str());
-	}
+    /**
+    * ãƒãƒƒãƒ•ã‚¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆã™ã‚‹.
+    *
+    * @param size ãƒ‡ãƒ¼ã‚¿ã®ã‚µã‚¤ã‚º.
+    * @param data ãƒ‡ãƒ¼ã‚¿ã¸ã®ãƒã‚¤ãƒ³ã‚¿.
+    *
+    * @return ä½œæˆã—ãŸãƒãƒƒãƒ•ã‚¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ.
+    */
+    GLuint CreateBuffer(GLsizeiptr size, const GLvoid* data)
+    {
+        GLuint id = 0;
+        glCreateBuffers(1, &id);
+        glNamedBufferStorage(id, size, data, 0);
+        return id;
+    }
 
-	/**
-	* ƒpƒCƒvƒ‰ƒCƒ“EƒIƒuƒWƒFƒNƒg‚ğì¬‚·‚é.
-	*
-	* @param vp  ’¸“_ƒVƒF[ƒ_[EƒvƒƒOƒ‰ƒ€.
-	* @param fp  ƒtƒ‰ƒOƒƒ“ƒgƒVƒF[ƒ_[EƒvƒƒOƒ‰ƒ€.
-	*
-	* @retval 0‚æ‚è‘å‚«‚¢ ì¬‚µ‚½ƒpƒCƒvƒ‰ƒCƒ“EƒIƒuƒWƒFƒNƒg.
-	* @retval 0         ƒpƒCƒvƒ‰ƒCƒ“EƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s.
-	*/
-	GLuint CreatePipeline(GLuint vp, GLuint fp)
-	{
-		glGetError(); // ƒGƒ‰[ó‘Ô‚ğƒŠƒZƒbƒg.
+    /**
+    * Vertex Array Objectã‚’ä½œæˆã™ã‚‹.
+    *
+    * @param vboPosition VAOã«é–¢é€£ä»˜ã‘ã‚‰ã‚Œã‚‹åº§æ¨™ãƒ‡ãƒ¼ã‚¿.
+    * @param vboColor    VAOã«é–¢é€£ä»˜ã‘ã‚‰ã‚Œã‚‹ã‚«ãƒ©ãƒ¼ãƒ‡ãƒ¼ã‚¿.
+    * @param vboTexcoord VAOã«é–¢é€£ä»˜ã‘ã‚‰ã‚Œã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ãƒ‡ãƒ¼ã‚¿.
+    * @param vboNormal   VAOã«é–¢é€£ä»˜ã‘ã‚‰ã‚Œã‚‹æ³•ç·šãƒ‡ãƒ¼ã‚¿.
+    * @param ibo         VAOã«é–¢é€£ä»˜ã‘ã‚‰ã‚Œã‚‹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒ‡ãƒ¼ã‚¿.
+    *
+    * @return ä½œæˆã—ãŸVAO.
+    */
+    GLuint CreateVertexArray(GLuint vboPosition, GLuint vboColor,
+        GLuint vboTexcoord, GLuint vboNormal, GLuint ibo)
+    {
+        if (!vboPosition || !vboColor || !vboTexcoord || !vboNormal || !ibo) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":ãƒãƒƒãƒ•ã‚¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒ0ã§ã™ã€‚\n";
+            return 0;
+        }
 
-		GLuint id;
-		glCreateProgramPipelines(1, &id);
-		glUseProgramStages(id, GL_VERTEX_SHADER_BIT, vp);
-		glUseProgramStages(id, GL_FRAGMENT_SHADER_BIT, fp);
+        GLuint id = 0;
+        glCreateVertexArrays(1, &id);
 
-		if (glGetError() != GL_NO_ERROR) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":ƒvƒƒOƒ‰ƒ€ƒpƒCƒvƒ‰ƒCƒ“‚Ìì¬‚É¸”s.\n";
-			glDeleteProgramPipelines(1, &id);
-			return 0;			
-		}
+        const GLuint positionIndex = 0;
+        const GLuint positionBindingIndex = 0;
+        glEnableVertexArrayAttrib(id, positionIndex);
+        glVertexArrayAttribFormat(id, positionIndex, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(id, positionIndex, positionBindingIndex);
+        glVertexArrayVertexBuffer(
+            id, positionBindingIndex, vboPosition, 0, sizeof(Position));
 
-		GLint testVp = 0;
-		glGetProgramPipelineiv(id, GL_VERTEX_SHADER, &testVp);
-		if (testVp != vp) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":’¸“_ƒVƒF[ƒ_‚Ìİ’è‚É¸”s.\n";
-			glDeleteProgramPipelines(1, &id);
-			return 0;
-			
-		}
-		 GLint testFp = 0;
-		glGetProgramPipelineiv(id, GL_FRAGMENT_SHADER, &testFp);
-		if (testFp != fp) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":ƒtƒ‰ƒOƒƒ“ƒgƒVƒF[ƒ_‚Ìİ’è‚É¸”s.\n";
-			glDeleteProgramPipelines(1, &id);
-			return 0;			
-		}
+        const GLuint colorIndex = 1;
+        const GLuint colorBindingIndex = 1;
+        glEnableVertexArrayAttrib(id, colorIndex);
+        glVertexArrayAttribFormat(id, colorIndex, 4, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(id, colorIndex, colorBindingIndex);
+        glVertexArrayVertexBuffer(id, colorBindingIndex, vboColor, 0, sizeof(Color));
 
-		return id;
-	}
+        const GLuint texcoordIndex = 2;
+        const GLuint texcoordBindingIndex = 2;
+        glEnableVertexArrayAttrib(id, texcoordIndex);
+        glVertexArrayAttribFormat(id, texcoordIndex, 2, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(id, texcoordIndex, texcoordBindingIndex);
+        glVertexArrayVertexBuffer(
+            id, texcoordBindingIndex, vboTexcoord, 0, sizeof(glm::vec2));
 
-	/**
-	* ƒTƒ“ƒvƒ‰EƒIƒuƒWƒFƒNƒg‚ğì¬‚·‚é.
-	*
-	* @param wrapMode  ƒ‰ƒbƒvEƒ‚[ƒh.
-	*
-	* @retval 0ˆÈŠO ì¬‚µ‚½ƒTƒ“ƒvƒ‰EƒIƒuƒWƒFƒNƒg.
-	* @retval 0     ƒTƒ“ƒvƒ‰EƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s.
-	*/
-	GLuint CreateSampler(GLenum wrapMode)
-	{
-		glGetError(); // ƒGƒ‰[ó‘Ô‚ğƒŠƒZƒbƒg.
+        const GLuint normalIndex = 3;
+        const GLuint normalBindingIndex = 3;
+        glEnableVertexArrayAttrib(id, normalIndex);
+        glVertexArrayAttribFormat(id, normalIndex, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(id, normalIndex, normalBindingIndex);
+        glVertexArrayVertexBuffer(
+            id, normalBindingIndex, vboNormal, 0, sizeof(glm::vec3));
 
-		// ƒTƒ“ƒvƒ‰EƒIƒuƒWƒFƒNƒg‚ğì¬‚·‚é.
-		GLuint id;
-		glCreateSamplers(1, &id);
-		if (glGetError() != GL_NO_ERROR) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << "ƒTƒ“ƒvƒ‰‚Ìì¬‚É¸”s\n";
-			glDeleteSamplers(1, &id);
-			return 0;			
-		}
+        glVertexArrayElementBuffer(id, ibo);
 
-		// ƒ‰ƒbƒvEƒ‚[ƒh‚ğİ’è‚·‚é.
-		 glSamplerParameteri(id, GL_TEXTURE_WRAP_S, wrapMode);
-		glSamplerParameteri(id, GL_TEXTURE_WRAP_T, wrapMode);
-		if (glGetError() != GL_NO_ERROR) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":ƒ‰ƒbƒvƒ‚[ƒh‚Å‚Í‚È‚¢’l‚ªw’è‚³‚ê‚½.\n";
-			glDeleteSamplers(1, &id);
-			return 0;			
-		}
+        return id;
+    }
 
-		// ƒtƒBƒ‹ƒ^‚ğİ’è‚·‚é.
-		 glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		if (glGetError() != GL_NO_ERROR) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":ƒtƒBƒ‹ƒ^‚Å‚Í‚È‚¢’l‚ªw’è‚³‚ê‚½.\n";
-			glDeleteSamplers(1, &id);
-			return 0;			
-		}
+    /**
+    * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ»ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’ãƒ“ãƒ«ãƒ‰ã™ã‚‹.
+    *
+    * @param type ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ç¨®é¡.
+    * @param code ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ»ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¸ã®ãƒã‚¤ãƒ³ã‚¿.
+    *
+    * @retval 0ã‚ˆã‚Šå¤§ãã„ ä½œæˆã—ãŸãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ.
+    * @retval 0          ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—.
+    */
+    GLuint CreateProgram(GLenum type, const GLchar* code)
+    {
+        GLuint program = glCreateShaderProgramv(type, 1, &code);
 
-		return id;
-	}
+        GLint status = 0;
+        glGetProgramiv(program, GL_LINK_STATUS, &status);
+        if (status == GL_FALSE) {
+            GLint infoLen = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
+            if (infoLen) {
+                std::vector<char> buf;
+                buf.resize(infoLen);
+                if ((int)buf.size() >= infoLen) {
+                    glGetProgramInfoLog(program, infoLen, nullptr, buf.data());
+                    std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ <<
+                        ":ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ãƒ“ãƒ«ãƒ‰ã«å¤±æ•—.\n" << buf.data() << "\n";
+                }
+            }
+            glDeleteProgram(program);
+            return 0;
+        }
+        return program;
+    }
 
-	/**
-* 2DƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é.
-*
-* @param width   ‰æ‘œ‚Ì•(ƒsƒNƒZƒ‹”).
-* @param height  ‰æ‘œ‚Ì‚‚³(ƒsƒNƒZƒ‹”).
-* @param data    ‰æ‘œƒf[ƒ^‚ÌƒAƒhƒŒƒX.
-*
-* @retval 0ˆÈŠO  ì¬‚µ‚½ƒeƒNƒXƒ`ƒƒEƒIƒuƒWƒFƒNƒg‚ÌID.
-* @retval 0      ƒeƒNƒXƒ`ƒƒ‚Ìì¬‚É¸”s.
-*/
-	GLuint CreateImage2D(GLsizei width, GLsizei height, const void* data,
-		GLenum pixelFormat, GLenum type)
-	{
-		glGetError(); // ƒGƒ‰[ó‘Ô‚ğƒŠƒZƒbƒg.
+    /**
+    * ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ã‚·ã‚§ãƒ¼ãƒ€ãƒ»ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’ä½œæˆã™ã‚‹.
+    *
+    * @param type     ã‚·ã‚§ãƒ¼ãƒ€ã®ç¨®é¡.
+    * @param filename ã‚·ã‚§ãƒ¼ãƒ€ãƒ•ã‚¡ã‚¤ãƒ«å.
+    *
+    * @retval 0ã‚ˆã‚Šå¤§ãã„ ä½œæˆã—ãŸãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ.
+    * @retval 0           ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—.
+    */
+    GLuint CreateProgramFromFile(GLenum type, const char* filename)
+    {
+        std::ifstream ifs(filename);
+        if (!ifs) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":" << filename <<
+                "ã‚’é–‹ã‘ã¾ã›ã‚“.\n";
+            return 0;
+        }
+        std::stringstream ss;
+        ss << ifs.rdbuf();
+        return GLContext::CreateProgram(type, ss.str().c_str());
+    }
 
-		// ƒeƒNƒXƒ`ƒƒEƒIƒuƒWƒFƒNƒg‚ğì¬‚µAGPUƒƒ‚ƒŠ‚ğŠm•Û‚·‚é.
-		GLuint id;
-		glCreateTextures(GL_TEXTURE_2D, 1, &id);
-		glTextureStorage2D(id, 1, GL_RGBA8, width, height);
+    /**
+    * ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆã™ã‚‹.
+    *
+    * @param vp  é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ»ãƒ—ãƒ­ã‚°ãƒ©ãƒ .
+    * @param fp  ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ»ãƒ—ãƒ­ã‚°ãƒ©ãƒ .
+    *
+    * @retval 0ã‚ˆã‚Šå¤§ãã„ ä½œæˆã—ãŸãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ.
+    * @retval 0         ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—.
+    */
+    GLuint CreatePipeline(GLuint vp, GLuint fp)
+    {
+        glGetError(); // ã‚¨ãƒ©ãƒ¼çŠ¶æ…‹ã‚’ãƒªã‚»ãƒƒãƒˆ.
 
-		// Œ»İ‚ÌƒAƒ‰ƒCƒ“ƒƒ“ƒg‚ğ‹L˜^‚µ‚Ä‚©‚çAƒAƒ‰ƒCƒ“ƒƒ“ƒg‚ğ1‚É‚·‚é.
-		GLint alignment;
-		glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        GLuint id;
+        glCreateProgramPipelines(1, &id);
+        glUseProgramStages(id, GL_VERTEX_SHADER_BIT, vp);
+        glUseProgramStages(id, GL_FRAGMENT_SHADER_BIT, fp);
+        if (glGetError() != GL_NO_ERROR) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã®ä½œæˆã«å¤±æ•—.\n";
+            glDeleteProgramPipelines(1, &id);
+            return 0;
+        }
 
-		// GPUƒƒ‚ƒŠ‚Éƒf[ƒ^‚ğ“]‘—‚·‚é.
-		glTextureSubImage2D(id, 0, 0, 0, width, height, pixelFormat, type, data);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, alignment); // ƒAƒ‰ƒCƒ“ƒƒ“ƒg‚ğŒ³‚É–ß‚·.
-		const GLenum result = glGetError();
-		if (result != GL_NO_ERROR) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << "ƒeƒNƒXƒ`ƒƒ‚Ìì¬‚É¸”s\n";
-			glDeleteTextures(1, &id);
-			return 0;
-		}
+        GLint testVp = 0;
+        glGetProgramPipelineiv(id, GL_VERTEX_SHADER, &testVp);
+        if (testVp != vp) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ã®è¨­å®šã«å¤±æ•—.\n";
+            glDeleteProgramPipelines(1, &id);
+            return 0;
+        }
+        GLint testFp = 0;
+        glGetProgramPipelineiv(id, GL_FRAGMENT_SHADER, &testFp);
+        if (testFp != fp) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆã‚·ã‚§ãƒ¼ãƒ€ã®è¨­å®šã«å¤±æ•—.\n";
+            glDeleteProgramPipelines(1, &id);
+            return 0;
+        }
+        return id;
+    }
 
-		// ”’•‰æ‘œ‚Ìê‡A(R,R,R,1)‚Æ‚µ‚Ä“Ç‚İæ‚ç‚ê‚é‚æ‚¤‚Éİ’è‚·‚é.
-		if (pixelFormat == GL_RED) {
-			glTextureParameteri(id, GL_TEXTURE_SWIZZLE_G, GL_RED);
-			glTextureParameteri(id, GL_TEXTURE_SWIZZLE_B, GL_RED);			
-		}
+    /**
+    * ã‚µãƒ³ãƒ—ãƒ©ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆã™ã‚‹.
+    *
+    * @param wrapMode  ãƒ©ãƒƒãƒ—ãƒ»ãƒ¢ãƒ¼ãƒ‰.
+    *
+    * @retval 0ã‚ˆã‚Šå¤§ãã„ ä½œæˆã—ãŸã‚µãƒ³ãƒ—ãƒ©ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ.
+    * @retval 0          ã‚µãƒ³ãƒ—ãƒ©ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—.
+    */
+    GLuint CreateSampler(GLenum wrapMode)
+    {
+        GLuint id;
+        glCreateSamplers(1, &id);
+        if (glGetError() != GL_NO_ERROR) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":ãƒ©ãƒƒãƒ—ãƒ¢ãƒ¼ãƒ‰ã§ã¯ãªã„å€¤ãŒæŒ‡å®šã•ã‚ŒãŸ.\n";
+            glDeleteSamplers(1, &id);
+            return 0;
+        }
 
-		return id;
-	}
+        // ãƒ©ãƒƒãƒ—ãƒ»ãƒ¢ãƒ¼ãƒ‰ã‚’è¨­å®šã™ã‚‹.
+        glSamplerParameteri(id, GL_TEXTURE_WRAP_S, wrapMode);
+        glSamplerParameteri(id, GL_TEXTURE_WRAP_T, wrapMode);
+        if (glGetError() != GL_NO_ERROR) {
+            glDeleteSamplers(1, &id);
+            return 0;
+        }
 
-	/**
-	* ƒtƒ@ƒCƒ‹‚©‚ç2DƒeƒNƒXƒ`ƒƒ‚ğ“Ç‚İ‚Ş.
-	*
-	* @param filename 2DƒeƒNƒXƒ`ƒƒ‚Æ‚µ‚Ä“Ç‚İ‚Şƒtƒ@ƒCƒ‹–¼.
-	*
-	* @retval 0ˆÈŠO ì¬‚µ‚½ƒeƒNƒXƒ`ƒƒEƒIƒuƒWƒFƒNƒg‚ÌID.
-	*         0     ƒeƒNƒXƒ`ƒƒ‚Ìì¬‚É¸”s.
-	*/
-	GLuint CreateImage2D(const char* filename)
-	{
-		// ƒtƒ@ƒCƒ‹‚ğŠJ‚­.
-		std::ifstream ifs;
-		ifs.open(filename, std::ios_base::binary);
-		if (!ifs) {
-			std::cerr << "[ƒGƒ‰[]" << __func__ << ":`" << filename << "`‚ğŠJ‚¯‚Ü‚¹‚ñ.\n";
-			return 0;
-		}
+        // ãƒ•ã‚£ãƒ«ã‚¿ã‚’è¨­å®šã™ã‚‹.
+        glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        if (glGetError() != GL_NO_ERROR) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":ãƒ•ã‚£ãƒ«ã‚¿ã§ã¯ãªã„å€¤ãŒæŒ‡å®šã•ã‚ŒãŸ.\n";
+            glDeleteSamplers(1, &id);
+            return 0;
+        }
 
-		// TGAƒwƒbƒ_‚ğ“Ç‚İ‚Ş.
-		uint8_t tgaHeader[18]; // TGAƒwƒbƒ_‚Í18ƒoƒCƒg.
-		ifs.read(reinterpret_cast<char*>(tgaHeader), 18);
+        return id;
+    }
 
-		// ƒCƒ[ƒWID‚ğ“Ç‚İ”ò‚Î‚·.
-		ifs.ignore(tgaHeader[0]);
+    /**
+    * 2Dãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹.
+    *
+    * @param width   ç”»åƒã®å¹…(ãƒ”ã‚¯ã‚»ãƒ«æ•°).
+    * @param height  ç”»åƒã®é«˜ã•(ãƒ”ã‚¯ã‚»ãƒ«æ•°).
+    * @param data    ç”»åƒãƒ‡ãƒ¼ã‚¿ã®ã‚¢ãƒ‰ãƒ¬ã‚¹.
+    * @param pixelFormat  ç”»åƒãƒ‡ãƒ¼ã‚¿å½¢å¼(GL_BGRAãªã©).
+    * @param type    ç”»åƒãƒ‡ãƒ¼ã‚¿ã®å‹.
+    *
+    * @retval 0ä»¥å¤–  ä½œæˆã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ID.
+    * @retval 0      ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ä½œæˆã«å¤±æ•—.
+    */
+    GLuint CreateImage2D(GLsizei width, GLsizei height, const void* data,
+        GLenum pixelFormat, GLenum type)
+    {
+        GLuint id;
 
-		// ƒJƒ‰[ƒ}ƒbƒv‚ğ“Ç‚İ”ò‚Î‚·.
-		if (tgaHeader[1]) {
-			const int colorMapLength = tgaHeader[5] + tgaHeader[6] * 0x100;
-			const int colorMapEntrySize = tgaHeader[7];
-			// ƒGƒ“ƒgƒŠ[ƒTƒCƒY‚Íƒrƒbƒg”‚È‚Ì‚ÅA8‚ÅŠ„‚Á‚ÄƒoƒCƒg”‚É•ÏŠ·‚·‚é.
-			const int colorMapSize = (colorMapLength * colorMapEntrySize + 7) / 8;
-			ifs.ignore(colorMapSize);
-		}
+        // ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆã—ã€GPUãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿ã™ã‚‹.
+        glCreateTextures(GL_TEXTURE_2D, 1, &id);
+        glTextureStorage2D(id, 1, GL_RGBA8, width, height);
 
-		// ‰æ‘œƒf[ƒ^‚ğ“Ç‚İ‚Ş.
-		const int width = tgaHeader[12] + tgaHeader[13] * 0x100;
-		const int height = tgaHeader[14] + tgaHeader[15] * 0x100;
-		const int pixelDepth = tgaHeader[16];
-		const int imageSize = width * height * pixelDepth / 8;
-		std::vector<uint8_t> buf(imageSize);
-		ifs.read(reinterpret_cast<char*>(buf.data()), imageSize);
+        // GPUãƒ¡ãƒ¢ãƒªã«ãƒ‡ãƒ¼ã‚¿ã‚’è»¢é€ã™ã‚‹.
+        GLint alignment;
+        glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTextureSubImage2D(id, 0, 0, 0, width, height, pixelFormat, type, data);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+        const GLenum result = glGetError();
+        if (result != GL_NO_ERROR) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << "ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ä½œæˆã«å¤±æ•—\n";
+            glDeleteTextures(1, &id);
+            return 0;
+        }
 
-		// TGAƒwƒbƒ_18ƒoƒCƒg–Ú‚Ì‘æ5ƒrƒbƒg‚ÍA‰æ‘œƒf[ƒ^‚ÌŠi”[•ûŒü‚ğ•\‚·.
-		//   0‚Ìê‡: ‰º‚©‚çã
-		//   1‚Ìê‡: ã‚©‚ç‰º
-		// OpenGL‚Í‰æ‘œƒf[ƒ^‚ğu‰º‚©‚çãv‚ÉŠi”[‚·‚éƒ‹[ƒ‹‚É‚È‚Á‚Ä‚¢‚é‚Ì‚ÅA
-		// TGA‚ªuã‚©‚ç‰ºv‚ÉŠi”[‚³‚ê‚Ä‚¢‚éê‡‚Í‰æ‘œ‚ğã‰º”½“]‚·‚é.
-		if (tgaHeader[17] & 0x20) {
-			const size_t lineSize = width * pixelDepth / 8;
-			std::vector<uint8_t> tmp(imageSize);
-			std::vector<uint8_t>::iterator source = buf.begin();
-			std::vector<uint8_t>::iterator destination = tmp.end();
-			for (size_t i = 0; i < height; ++i) {
-				destination -= lineSize;
-				std::copy(source, source + lineSize, destination);
-				source += lineSize;
-			}
-			buf.swap(tmp);
-		}
+        // ç™½é»’ç”»åƒã®å ´åˆã€(R,R,R,1)ã¨ã—ã¦èª­ã¿å–ã‚‰ã‚Œã‚‹ã‚ˆã†ã«è¨­å®šã™ã‚‹.
+        if (pixelFormat == GL_RED) {
+            glTextureParameteri(id, GL_TEXTURE_SWIZZLE_G, GL_RED);
+            glTextureParameteri(id, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        }
 
-		// ƒf[ƒ^‚ÌŒ^‚ğ‘I‚Ô.
-		GLenum type = GL_UNSIGNED_BYTE;
-		if (tgaHeader[16] == 16) {
-			type = GL_UNSIGNED_SHORT_1_5_5_5_REV;			
-		}
+        return id;
+    }
 
-		// ƒsƒNƒZƒ‹Œ`®‚ğ‘I‚Ô.
-		 GLenum pixelFormat = GL_BGRA;
-		if (tgaHeader[2] == 3) { // ˆ³k‚È‚µA”’•‰æ‘œ.
-			pixelFormat = GL_RED;			
-		}
+    /**
+    * ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰2Dãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’èª­ã¿è¾¼ã‚€.
+    *
+    * @param filename 2Dãƒ†ã‚¯ã‚¹ãƒãƒ£ã¨ã—ã¦èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«å.
+    *
+    * @retval 0ä»¥å¤– ä½œæˆã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ID.
+    *         0     ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ä½œæˆã«å¤±æ•—.
+    */
+    GLuint CreateImage2D(const char* filename)
+    {
+        // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã.
+        std::ifstream ifs;
+        ifs.open(filename, std::ios_base::binary);
+        if (!ifs) {
+            std::cerr << "[ã‚¨ãƒ©ãƒ¼]" << __func__ << ":`" << filename << "`ã‚’é–‹ã‘ã¾ã›ã‚“.\n";
+            return 0;
+        }
 
-		if (tgaHeader[16] == 24) {
-			pixelFormat = GL_BGR;
-		}
+        // TGAãƒ˜ãƒƒãƒ€ã‚’èª­ã¿è¾¼ã‚€.
+        uint8_t tgaHeader[18];
+        ifs.read(reinterpret_cast<char*>(tgaHeader), 18);
 
-		// “Ç‚İ‚ñ‚¾‰æ‘œƒf[ƒ^‚©‚çƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é.
-		return CreateImage2D(width, height, buf.data(),
-			pixelFormat, type);
-	}
+        // ã‚¤ãƒ¡ãƒ¼ã‚¸IDã‚’èª­ã¿é£›ã°ã™.
+        ifs.ignore(tgaHeader[0]);
+
+        // ã‚«ãƒ©ãƒ¼ãƒãƒƒãƒ—ã‚’èª­ã¿é£›ã°ã™.
+        if (tgaHeader[1]) {
+            const int colorMapLength = tgaHeader[5] + tgaHeader[6] * 0x100;
+            const int colorMapEntrySize = tgaHeader[7];
+            // ã‚¨ãƒ³ãƒˆãƒªãƒ¼ã‚µã‚¤ã‚ºã¯ãƒ“ãƒƒãƒˆæ•°ãªã®ã§ã€8ã§å‰²ã£ã¦ãƒã‚¤ãƒˆæ•°ã«å¤‰æ›ã™ã‚‹.
+            const int colorMapSize = (colorMapLength * colorMapEntrySize + 7) / 8;
+            ifs.ignore(colorMapSize);
+        }
+
+        // ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€.
+        const int width = tgaHeader[12] + tgaHeader[13] * 0x100;
+        const int height = tgaHeader[14] + tgaHeader[15] * 0x100;
+        const int pixelDepth = tgaHeader[16];
+        const int imageSize = width * height * pixelDepth / 8;
+        std::vector<uint8_t> buf(imageSize);
+        ifs.read(reinterpret_cast<char*>(buf.data()), imageSize);
+
+        // TGAãƒ˜ãƒƒãƒ€18ãƒã‚¤ãƒˆç›®ã®ç¬¬5ãƒ“ãƒƒãƒˆã¯ã€ç”»åƒãƒ‡ãƒ¼ã‚¿ã®æ ¼ç´æ–¹å‘ã‚’è¡¨ã™.
+        //   0ã®å ´åˆ: ä¸‹ã‹ã‚‰ä¸Š
+        //   1ã®å ´åˆ: ä¸Šã‹ã‚‰ä¸‹
+        // OpenGLã¯ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’ã€Œä¸‹ã‹ã‚‰ä¸Šã€ã«æ ¼ç´ã™ã‚‹ãƒ«ãƒ¼ãƒ«ã«ãªã£ã¦ã„ã‚‹ã®ã§ã€
+        // TGAãŒã€Œä¸Šã‹ã‚‰ä¸‹ã€ã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ç”»åƒã‚’ä¸Šä¸‹åè»¢ã™ã‚‹.
+        if (tgaHeader[17] & 0x20) {
+            const size_t lineSize = width * pixelDepth / 8;
+            std::vector<uint8_t> tmp(imageSize);
+            std::vector<uint8_t>::iterator source = buf.begin();
+            std::vector<uint8_t>::iterator destination = tmp.end();
+            for (size_t i = 0; i < height; ++i) {
+                destination -= lineSize;
+                std::copy(source, source + lineSize, destination);
+                source += lineSize;
+            }
+            buf.swap(tmp);
+        }
+
+        // ãƒ‡ãƒ¼ã‚¿ã®å‹ã‚’é¸ã¶.
+        GLenum type = GL_UNSIGNED_BYTE;
+        if (tgaHeader[16] == 16) {
+            type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+        }
+
+        // ãƒ”ã‚¯ã‚»ãƒ«å½¢å¼ã‚’é¸ã¶.
+        GLenum pixelFormat = GL_BGRA;
+        if (tgaHeader[2] == 3) { // åœ§ç¸®ãªã—ã€ç™½é»’ç”»åƒ.
+            pixelFormat = GL_RED;
+        }
+        if (tgaHeader[16] == 24) {
+            pixelFormat = GL_BGR;
+        }
+
+        // èª­ã¿è¾¼ã‚“ã ç”»åƒãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹.
+        return CreateImage2D(width, height, buf.data(),
+            pixelFormat, type);
+    }
+
 } // namespace GLContext
