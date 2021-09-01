@@ -639,8 +639,9 @@ int main()
 
         // アクターを描画する
         for (int i = 0; i < actors.size(); ++i) {
-            //Draw(*actors[i], pipeline, matProj, matView);
+            Draw(*actors[i], pipeline, matProj, matView);
         }
+
         engine.RenderUI();
 
         // テクスチャの割り当てを解除.
