@@ -1,8 +1,14 @@
-#version 450 \n"
-layout(location=0) in vec4 inColor;
+#version 450
+
+// 入力変数
+layout(location=0) in vec4 inColor; 
 layout(location=1) in vec2 inTexcoord;
 layout(location=2) in vec3 inNormal;
+
+// 出力変数
 out vec4 fragColor; 
+
+// ユニフォーム変数
 layout(binding=0) uniform sampler2D texColor;
 
 // 平行光源
@@ -20,23 +26,23 @@ vec3 ambientLight = { 0.15, 0.10, 0.20 };
 
 // フラグメントシェーダープログラム
 void main() {
-  vec4 tc = texture(texColor, inTexcoord); 
-  fragColor = inColor * tc; 
+  vec4 tc = texture(texColor, inTexcoord);
+  fragColor = inColor * tc;
 
   // 線形補間によって長さが1ではなくなっているので、正規化して長さを1に復元する.
- vec3 worldNormal = normalize(inNormal);
+  vec3 worldNormal = normalize(inNormal);
 
- // 面が裏向きの場合、法線の向きを逆にする.
- if (gl_FrontFacing == false) {
-   worldNormal = -worldNormal;
- }
+  // 面が裏向きの場合、法線の向きを逆にする.
+  if (gl_FrontFacing == false) {
+    worldNormal = -worldNormal;
+  }
 
- // 環境光を設定.
- vec3 lightColor = ambientLight;
+  // 環境光を設定.
+  vec3 lightColor = ambientLight;
 
- // ランバート反射による明るさを計算.
- float cosTheta = max(dot(worldNormal, -light.direction), 0);
- lightColor += light.color * cosTheta;
+  // ランバート反射による明るさを計算.
+  float cosTheta = max(dot(worldNormal, -light.direction), 0);
+  lightColor += light.color * cosTheta;
 
- fragColor.rgb *= lightColor;
-} 
+  fragColor.rgb *= lightColor;
+}

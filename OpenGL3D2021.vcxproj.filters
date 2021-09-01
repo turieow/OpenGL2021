@@ -84,7 +84,7 @@
     <None Include="Res\FragmentLighting.frag">
       <Filter>リソース ファイル</Filter>
     </None>
-    <None Include="Res\FragmentLightting.vert">
+    <None Include="Res\FragmentLighting.vert">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>
