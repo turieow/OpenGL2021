@@ -76,7 +76,10 @@ bool GameEngine::Initialize()
         glfwGetWindowSize(window, &w, &h);
         engine->windowSize = glm::vec2(w, h);
 
+        engine->pipeline.reset(new ProgramPipeline("Res/FragmentLighting.vert", "Res/FragmentLighting.frag"));
         engine->pipelineUI.reset(new ProgramPipeline("Res/Simple.vert", "Res/Simple.frag"));
+        
+        engine->sampler.reset(new Sampler(GL_REPEAT));
         engine->samplerUI.reset(new Sampler(GL_CLAMP_TO_EDGE));
 
         for (int layer = 0; layer < layerCount; ++layer) {
@@ -86,6 +89,12 @@ bool GameEngine::Initialize()
         engine->newActors.reserve(1000);
         engine->primitiveBuffer.reset(new PrimitiveBuffer(1'000'000, 4'000'000));
         engine->textureBuffer.reserve(1000);
+
+        // カメラのアスペクト比を設定
+        Camera& camera = engine->GetCamera();
+        camera.aspectRatio = engine->windowSize.x / engine->windowSize.y;
+
+       
 
         std::random_device rd;
         engine->rg.seed(rd());
@@ -247,7 +256,13 @@ void GameEngine::UpdatePhysics(float deltaTime)
 
         // 重なりを解決する
         SolveContact(contacts[i]);
-    }
+    }   
+}
+
+// カメラの状態を更新する
+void GameEngine::UpdateCamera()
+{
+    mainCamera.Update();
 }
 
 /**
@@ -260,6 +275,33 @@ void GameEngine::RemoveDeadActors()
         a.erase(std::remove_if(a.begin(), a.end(),
             [](std::shared_ptr<Actor>& a) { return a->isDead; }),
             a.end());
+    }
+}
+
+// デフォルトアクターを描画する
+void GameEngine::RenderDefault()
+{
+    glEnable(GL_DEPTH_TEST); // 深度バッファを有効にする.
+        //glEnable(GL_CULL_FACE);
+    glClearColor(0.5f, 0.5f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    primitiveBuffer->BindVertexArray();
+    pipeline->Bind();
+    sampler->Bind(0);   
+
+    const glm::mat4 matProj = mainCamera.GetProjectionMatrix();
+    const glm::mat4 matView = mainCamera.GetViewMatrix();
+
+    // アクターを描画する
+    const int layer = static_cast<int>(Layer::Default);
+    ActorList& defaultActors = actors[layer];
+    for (int i = 0; i < defaultActors.size(); ++i)
+    {
+        Draw(*defaultActors[i], *pipeline, matProj, matView);
     }
 }
 
@@ -298,6 +340,18 @@ void GameEngine::RenderUI()
 
     pipelineUI->Unbind();
     samplerUI->Unbind(0);
+    primitiveBuffer->UnbindVertexArray();
+}
+
+// 描画の後始末をする
+void GameEngine::PostRender()
+{
+    // テクスチャの割り当てを解除.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glBindSampler(0, 0);
+    glBindProgramPipeline(0);
     primitiveBuffer->UnbindVertexArray();
 }
 

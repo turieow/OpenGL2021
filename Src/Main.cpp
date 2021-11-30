@@ -358,10 +358,10 @@ int main()
     primitiveBuffer.AddFromObjFile("Res/Plane.obj");
 
     // パイプライン・オブジェクトを作成する.
-    ProgramPipeline pipeline("Res/FragmentLighting.vert", "Res/FragmentLighting.frag");
+   /* ProgramPipeline pipeline("Res/FragmentLighting.vert", "Res/FragmentLighting.frag");
     if (!pipeline.IsValid()) {
         return 1;
-    }
+    }*/
 
     // uniform変数の位置.
     const GLint locMatTRS = 0;
@@ -384,7 +384,7 @@ int main()
     std::shared_ptr<Texture> texHouse2(new Texture("Res/house/broken-house.tga"));
 
     // サンプラを作成.
-    std::shared_ptr<Sampler> sampler(new Sampler(GL_REPEAT));
+    //std::shared_ptr<Sampler> sampler(new Sampler(GL_REPEAT));
 
     // マップに配置する物体の表示データ.
     struct ObjectData 
@@ -530,6 +530,8 @@ int main()
             // アクターの衝突判定を行う
 
             engine.UpdatePhysics(deltaTime);
+            manager.UpdateCamera();
+            engine.UpdateCamera();
 
             for (int i = 0; i < actors.size(); ++i)
             {
@@ -541,72 +543,19 @@ int main()
             // 削除待ちのアクターを削除する
             engine.RemoveDeadActors();
 
-            // カメラデータを更新する
-            {
-                std::shared_ptr<Actor> target = Find(actors, "Tiger-I");
-                if (target) {
-                    const glm::mat4 matRot = glm::rotate(glm::mat4(1), target->rotation, glm::vec3(0, 1, 0));
-                    const glm::vec3 tankFront = matRot * glm::vec4(0, 0, 1, 1);
-                    cameraPosition = target->position + glm::vec3(0, 20, 20);
-                    cameraTarget = target->position;
-                }
-            }
+           
         }
 
         //
         // ゲーム状態を描画する
         //
 
-        glEnable(GL_DEPTH_TEST); // 深度バッファを有効にする.
-        //glEnable(GL_CULL_FACE);
-        glClearColor(0.5f, 0.5f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        primitiveBuffer.BindVertexArray();
-        pipeline.Bind();
-        sampler->Bind(0);
-
-        float s = sin(glm::radians(degree));
-        float c = cos(glm::radians(degree));
-        degree += 0.01f;
-        glm::mat4 matT = glm::mat4(1);
-        matT[3] = glm::vec4(-0.3, -0.5, 0.0, 1.0);
-        glm::mat4 matS = glm::mat4(1);
-        matS[0][0] = 0.5;
-        matS[1][1] = 1.5;
-        glm::mat4 matR = glm::mat4(1);
-        matR[0][0] = c;
-        matR[0][1] = -s;
-        matR[1][0] = s;
-        matR[1][1] = c;
-
-        // プロジェクション行列を作成.
-        const glm::vec2 windowSize = engine.GetWindowSize();
-        const float aspectRatio = windowSize.x / windowSize.y;
-        const glm::mat4 matProj =
-            glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 200.0f);
-
-        // ビュー行列を作成.
-        const glm::mat4 matView =
-            glm::lookAt(cameraPosition, cameraTarget, glm::vec3(0, 1, 0));
-
-        // アクターを描画する
-        for (int i = 0; i < actors.size(); ++i) {
-            Draw(*actors[i], pipeline, matProj, matView);
-        }
-
+        
+        engine.RenderDefault();
         engine.RenderUI();
+        engine.PostRender();
 
-        // テクスチャの割り当てを解除.
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindSampler(0, 0);
-        glBindProgramPipeline(0);
-        primitiveBuffer.UnbindVertexArray();
+        
 
         engine.SwapBuffers();
     }

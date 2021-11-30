@@ -26,6 +26,7 @@ public:
     void SetState(State s);
 
     void Update(float deltaTime);
+    void UpdateCamera();
 
 private:
     GameManager() = default;

@@ -9,6 +9,7 @@
 #include "ProgramPipeline.h"
 #include "Sampler.h"
 #include "Actor.h"
+#include "Camera.h"
 #include <GLFW/glfw3.h>
 #include <unordered_map>
 #include <random>
@@ -34,8 +35,11 @@ public:
     void UpdateActors(float deltaTime);
     void PostUpdateActors();
     void UpdatePhysics(float deltaTime);
+    void UpdateCamera();
     void RemoveDeadActors();
+    void RenderDefault();
     void RenderUI();
+    void PostRender();
 
     PrimitiveBuffer& GetPrimitiveBuffer() { return *primitiveBuffer; }
     bool LoadPrimitive(const char* filename);
@@ -93,6 +97,10 @@ public:
         return glfwGetTime();
     }
 
+    // メインカメラを取得する
+    Camera& GetCamera() { return mainCamera; }
+    const Camera& GetCamera() const { return mainCamera; }
+
     // テキストで作成していないメンバ関数
     std::shared_ptr<Texture> GetTexture(const char* filename) const;
     std::shared_ptr<Actor> FindActor(const char* name);
@@ -106,12 +114,15 @@ private:
 
     GLFWwindow* window = nullptr;
     glm::vec2 windowSize = glm::vec2(0);
+    std::shared_ptr<ProgramPipeline> pipeline;
     std::shared_ptr<ProgramPipeline> pipelineUI;
+    std::shared_ptr<Sampler> sampler;
     std::shared_ptr<Sampler> samplerUI;
     ActorList actors[layerCount]; // アクター配列
     ActorList newActors; // 追加するアクターの配列
     std::shared_ptr<PrimitiveBuffer> primitiveBuffer; // プリミティブ配列
     TextureBuffer textureBuffer;                      // テクスチャ配列
+    Camera mainCamera;  // メインカメラ
 
     // テキストで作成していないメンバ変数
     std::mt19937 rg;

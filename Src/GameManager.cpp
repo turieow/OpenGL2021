@@ -133,6 +133,22 @@ void GameManager::Update(float deltaTime)
     }
 }
 
+// カメラの状態を更新する
+void GameManager::UpdateCamera()
+{
+    GameEngine& engine = GameEngine::Get();
+
+    // プレイヤー戦車を斜めに見下ろすように、カメラの位置と向きを設定する
+    {
+        std::shared_ptr<Actor> target = Find(engine.GetActors(), "Tiger-I");
+        if (target) {
+            Camera& camera = engine.GetCamera();
+            camera.position = target->position + glm::vec3(0, 20, 20);
+            camera.target = target->position;
+        }
+    }
+}
+
 /**
 * プレイヤーの戦車を生成する
 */

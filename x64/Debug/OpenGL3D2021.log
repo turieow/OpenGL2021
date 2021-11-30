@@ -1,8 +1,2 @@
-﻿  PlayerActor.cpp
-  RandomMovingEnemyActor.cpp
-  T34TankActor.cpp
-  GameEngine.cpp
-  GameManager.cpp
-  Main.cpp
-  コードを生成中...
+﻿  GameManager.cpp
   OpenGL3D2021.vcxproj -> D:\C++\Project\OpenGL2021\x64\Debug\OpenGL3D2021.exe

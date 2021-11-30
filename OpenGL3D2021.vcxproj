@@ -157,6 +157,7 @@
     <ClCompile Include="Src\Actor\PlayerActor.cpp" />
     <ClCompile Include="Src\Actor\RandomMovingEnemyActor.cpp" />
     <ClCompile Include="Src\Actor\T34TankActor.cpp" />
+    <ClCompile Include="Src\Camera.cpp" />
     <ClCompile Include="Src\GameEngine.cpp" />
     <ClCompile Include="Src\GameManager.cpp" />
     <ClCompile Include="Src\GameMap.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Src\Actor\PlayerActor.h" />
     <ClInclude Include="Src\Actor\RandomMovingEnemyActor.h" />
     <ClInclude Include="Src\Actor\T34TankActor.h" />
+    <ClInclude Include="Src\Camera.h" />
     <ClInclude Include="Src\GameEngine.h" />
     <ClInclude Include="Src\GameManager.h" />
     <ClInclude Include="Src\GameMap.h" />
