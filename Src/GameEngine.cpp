@@ -198,21 +198,38 @@ void GameEngine::UpdatePhysics(float deltaTime)
 {
     ActorList& actors = GetActors(Layer::Default);
 
+    // 非スタティックなアクターをリストアップ
+    ActorList nonStaticActors;
+    nonStaticActors.reserve(actors.size());
+    for (const std::shared_ptr<Actor>& e : actors)
+    {
+        if (!e->isStatic)
+        {
+            nonStaticActors.push_back(e);
+        }
+    }
+
     std::vector<Contact> contacts;
     contacts.reserve(actors.size());
-    for (int a = 0; a < actors.size(); ++a) {
-        for (int b = a + 1; b < actors.size(); ++b) {
+    for (std::shared_ptr<Actor>& a : nonStaticActors) {
+        for (std::shared_ptr<Actor>& b : actors) {
+
+            // 同じアクターは衝突しない
+            if (a == b)
+            {
+                continue;
+            }
 
             // 削除待ちアクターは衝突しない
-            if (actors[a]->isDead) {
+            if (a->isDead) {
                 break;
             }
-            else if (actors[b]->isDead) {
+            else if (b->isDead) {
                 continue;
             }
 
             Contact contact;
-            if (DetectCollision(*actors[a], *actors[b], contact)) {
+            if (DetectCollision(*a, *b, contact)) {
 #if 1
                 // 配列の中に、作成したコンタクト構造体と似ているものがあるか調べる
                 auto itr = std::find_if(contacts.begin(), contacts.end(),
