@@ -528,85 +528,15 @@ int main()
             engine.PostUpdateActors();
 
             // アクターの衝突判定を行う
-#if 0
-            std::vector<Actor*> dynamicActors;
-            std::vector<Actor*> staticActors;
-            dynamicActors.reserve(actors.size());
-            staticActors.reserve(actors.size());
-            for (int i = 0; i < actors.size(); ++i) {
-                if (actors[i]->isStatic) {
-                    staticActors.push_back(&actors[i]);
-                }
-                else {
-                    dynamicActors.push_back(&actors[i]);
-                }
-            }
-#endif
+
+            engine.UpdatePhysics(deltaTime);
 
             for (int i = 0; i < actors.size(); ++i)
             {
                 actors[i]->isOnActor = false;
             }
 
-            std::vector<Contact> contacts;
-            contacts.reserve(actors.size());
-            for (int a = 0; a < actors.size(); ++a) {
-                for (int b = a + 1; b < actors.size(); ++b) {
-
-                    // 削除待ちアクターは衝突しない
-                    if (actors[a]->isDead) {
-                        break;
-                    }
-                    else if (actors[b]->isDead) {
-                        continue;
-                    }
-
-                    Contact contact;
-                    if (DetectCollision(*actors[a], *actors[b], contact)) {
-#if 1
-                        // 配列の中に、作成したコンタクト構造体と似ているものがあるか調べる
-                        auto itr = std::find_if(contacts.begin(), contacts.end(),
-                            [&contact](const Contact& c) { return Equal(contact, c); });
-
-                        // 似ているコンタクト構造体が見つからなければ、作成した構造体を配列に追加する
-                        if (itr == contacts.end()) {
-                            contacts.push_back(contact);
-                        }
-                        else {
-                            // 似ている構造体が見つかった場合、浸透距離が長いほうを残す
-                            if (contact.penLength > itr->penLength) {
-                                *itr = contact;
-                            }
-                        }
-#else
-                        contacts.push_back(contact);
-#endif
-                    }
-                }
-            }
-
-            // 重なりを解決する
-            for (int i = 0; i < contacts.size(); ++i) {
-                Contact& c = contacts[i];
-
-                // 衝突処理関数を呼び出す
-                c.a->OnCollision(c);
-                Contact contactBtoA;
-                contactBtoA.a = c.b;
-                contactBtoA.b = c.a;
-                contactBtoA.velocityA = c.velocityB;
-                contactBtoA.velocityB = c.velocityA;
-                contactBtoA.accelA = c.accelB;
-                contactBtoA.accelB = c.accelA;
-                contactBtoA.penetration = -c.penetration;
-                contactBtoA.normal = -c.normal;
-                contactBtoA.position = c.position;
-                contactBtoA.penLength = c.penLength;
-                c.b->OnCollision(contactBtoA);
-
-                // 重なりを解決する
-                SolveContact(contacts[i]);
-            }
+           
 
             // 削除待ちのアクターを削除する
             engine.RemoveDeadActors();
