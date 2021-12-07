@@ -36,6 +36,7 @@ public:
     void PostUpdateActors();
     void UpdatePhysics(float deltaTime);
     void UpdateCamera();
+    void NewFrame();
     void RemoveDeadActors();
     void RenderDefault();
     void RenderUI();

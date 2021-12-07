@@ -2,6 +2,9 @@
 * @file GameEngine.cpp
 */
 #include "GameEngine.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
@@ -94,7 +97,11 @@ bool GameEngine::Initialize()
         Camera& camera = engine->GetCamera();
         camera.aspectRatio = engine->windowSize.x / engine->windowSize.y;
 
-       
+        // ImGuiの初期化
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        const char glsl_version[] = "#version 450";
+        ImGui_ImplOpenGL3_Init(glsl_version);
 
         std::random_device rd;
         engine->rg.seed(rd());
@@ -108,6 +115,11 @@ bool GameEngine::Initialize()
 void GameEngine::Finalize()
 {
     if (engine) {
+        // ImGuiの終了
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
         // GLFWの終了.
         glfwTerminate();
 
@@ -282,6 +294,14 @@ void GameEngine::UpdateCamera()
     mainCamera.Update();
 }
 
+// 新しいフレームを開始する
+void GameEngine::NewFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
 /**
 * 削除待ちのアクターを削除する
 */
@@ -299,7 +319,7 @@ void GameEngine::RemoveDeadActors()
 void GameEngine::RenderDefault()
 {
     glEnable(GL_DEPTH_TEST); // 深度バッファを有効にする.
-        //glEnable(GL_CULL_FACE);
+        //glEnable(GL_CULL_FACE);itiveBuffer->UnbindVertexAr
     glClearColor(0.5f, 0.5f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -358,6 +378,9 @@ void GameEngine::RenderUI()
     pipelineUI->Unbind();
     samplerUI->Unbind(0);
     primitiveBuffer->UnbindVertexArray();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 // 描画の後始末をする

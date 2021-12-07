@@ -521,6 +521,7 @@ int main()
         // ƒQ[ƒ€ó‘Ô‚ðXV‚·‚é
         //
 
+        engine.NewFrame();
         for (; diffLoopTime >= deltaTime; diffLoopTime -= deltaTime) 
         {
             engine.UpdateActors(deltaTime);
