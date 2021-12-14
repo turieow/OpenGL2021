@@ -1,45 +1,30 @@
 ﻿  Actor.cpp
 D:\C++\Project\OpenGL2021\Src\Actor.cpp(96,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-  BulletActor.cpp
-  ElevatorActor.cpp
   PlayerActor.cpp
   RandomMovingEnemyActor.cpp
   T34TankActor.cpp
-  Camera.cpp
   GameEngine.cpp
-D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(149,27): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(154,27): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(185,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(256,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(319,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(354,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(161,27): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(166,27): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(197,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(268,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(339,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameEngine.cpp(374,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
   GameManager.cpp
-D:\C++\Project\OpenGL2021\Src\GameManager.cpp(95,31): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameManager.cpp(177,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\GameManager.cpp(204,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-  GameMap.cpp
-D:\C++\Project\OpenGL2021\Src\GameMap.cpp(151,31): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-  GLContext.cpp
-D:\C++\Project\OpenGL2021\Src\GLContext.cpp(319,34): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_glut.cpp
-D:\C++\Project\OpenGL2021\Src\imgui\imgui_impl_glut.cpp(31,10): fatal error C1083: include ファイルを開けません。'GL/freeglut.h':No such file or directory
+D:\C++\Project\OpenGL2021\Src\GameManager.cpp(97,31): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameManager.cpp(213,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\GameManager.cpp(240,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+  imgui_impl_glfw.cpp
   imgui_impl_opengl3.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
   Main.cpp
 D:\C++\Project\OpenGL2021\Src\Main.cpp(439,43): warning C4018: '>=': signed と unsigned の数値を比較しようとしました。
-D:\C++\Project\OpenGL2021\Src\Main.cpp(536,31): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
+D:\C++\Project\OpenGL2021\Src\Main.cpp(537,31): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
   Primitive.cpp
 D:\C++\Project\OpenGL2021\Src\Primitive.cpp(505,31): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
 D:\C++\Project\OpenGL2021\Src\Primitive.cpp(646,34): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
 D:\C++\Project\OpenGL2021\Src\Primitive.cpp(661,34): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
 D:\C++\Project\OpenGL2021\Src\Primitive.cpp(715,23): warning C4018: '<': signed と unsigned の数値を比較しようとしました。
-  コードを生成中...
-  コンパイル中...
-  ProgramPipeline.cpp
-  Sampler.cpp
   Texture.cpp
   コードを生成中...
+  glad.c
+  OpenGL3D2021.vcxproj -> D:\C++\Project\OpenGL2021\Debug\OpenGL3D2021.exe

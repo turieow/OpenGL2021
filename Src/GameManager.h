@@ -27,6 +27,7 @@ public:
 
     void Update(float deltaTime);
     void UpdateCamera();
+    void UpdateUI();
 
 private:
     GameManager() = default;

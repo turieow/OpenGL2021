@@ -538,25 +538,19 @@ int main()
             {
                 actors[i]->isOnActor = false;
             }
-
-           
-
+          
             // 削除待ちのアクターを削除する
-            engine.RemoveDeadActors();
-
-           
+            engine.RemoveDeadActors();  
         }
+        manager.UpdateUI();
 
         //
         // ゲーム状態を描画する
         //
-
         
         engine.RenderDefault();
         engine.RenderUI();
-        engine.PostRender();
-
-        
+        engine.PostRender();        
 
         engine.SwapBuffers();
     }
